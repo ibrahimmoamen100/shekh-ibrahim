@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة تعليم القرآن للشيخ إبراهيم - لوحة التحكم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-green-600 text-white shadow-lg mb-8">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-xl font-bold">لوحة تحكم الإدارة</div>
+                <div class="space-x-4">
+                    <a href="/" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-lg">العودة للصفحة الرئيسية</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-green-600">نظام إدارة تعليم القرآن للشيخ إبراهيم</h1>
+        
+        <!-- إضافة طالب جديد -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">إضافة طالب جديد</h2>
+            <form id="addStudentForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm mb-1">اسم الطالب</label>
+                        <input type="text" name="name" required class="w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">الرقم السري للطالب</label>
+                        <div class="relative">
+                            <input type="password" id="password" name="password" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                                placeholder="أدخل الرقم السري">
+                            <button type="button" id="togglePassword" 
+                                class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div>
+            
+                    <div>
+                        <label class="block text-sm mb-1">السورة الحالية</label>
+                        <input type="text" name="currentSurah" required class="w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">نوع الدفع</label>
+                        <select name="paymentType" required class="w-full p-2 border rounded-md">
+                            <option value="monthly">شهري</option>
+                            <option value="perSession">بالحلقة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">صورة الطالب</label>
+                        <input type="file" name="photo" accept="image/*" class="w-full p-2 border rounded-md">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm mb-1">المواعيد</label>
+                    <div id="scheduleContainer" class="space-y-2">
+                        <div class="schedule-item grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm">اليوم</label>
+                                <select name="day" class="w-full p-2 border rounded-md" required>
+                                    <option value="">اختر اليوم</option>
+                                    <option value="الأحد">الأحد</option>
+                                    <option value="الإثنين">الإثنين</option>
+                                    <option value="الثلاثاء">الثلاثاء</option>
+                                    <option value="الأربعاء">الأربعاء</option>
+                                    <option value="الخميس">الخميس</option>
+                                    <option value="الجمعة">الجمعة</option>
+                                    <option value="السبت">السبت</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm">الوقت</label>
+                                <input type="time" name="time" class="w-full p-2 border rounded-md" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addScheduleItem()" class="mt-2 text-green-600 hover:text-green-800 text-sm">
+                        + إضافة موعد آخر
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-1">ملاحظات</label>
+                    <textarea name="notes" class="w-full p-2 border rounded-md" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                    إضافة الطالب
+                </button>
+            </form>
+        </div>
+
+        <!-- قائمة الطلاب -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">قائمة الطلاب</h2>
+            <div class="overflow-x-auto max-w-full">
+                <div class="inline-block min-w-full shadow-md rounded-lg overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50">الصورة</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السورة الحالية</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المواعيد</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد الحلقات</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع الدفع</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حالة الدفع</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التقييم</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ملاحظات</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsList" class="bg-white divide-y divide-gray-200">
+                            <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تعديل الطالب -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white p-6 rounded-lg w-full max-w-2xl mx-4">
+            <h2 class="text-xl font-semibold mb-4">تعديل بيانات الطالب</h2>
+            <form id="editStudentForm" class="space-y-4">
+                <input type="hidden" name="studentId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm mb-1">اسم الطالب</label>
+                        <input type="text" name="name" required class="w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">السورة الحالية</label>
+                        <input type="text" name="currentSurah" required class="w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">نوع الدفع</label>
+                        <select name="paymentType" required class="w-full p-2 border rounded-md">
+                            <option value="monthly">شهري</option>
+                            <option value="perSession">بالحلقة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">صورة الطالب</label>
+                        <input type="file" name="photo" accept="image/*" class="w-full p-2 border rounded-md">
+                        <img id="currentPhoto" src="" alt="" class="mt-2 w-20 h-20 object-cover rounded-full hidden">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-1">المواعيد</label>
+                    <div id="editScheduleContainer" class="space-y-2">
+                        <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                    </div>
+                    <button type="button" onclick="addScheduleItemToEdit()" class="mt-2 text-green-600 hover:text-green-800 text-sm">
+                        + إضافة موعد آخر
+                    </button>
+                </div>
+
+                <div>
+                    <label class="block text-sm mb-1">ملاحظات</label>
+                    <textarea name="notes" class="w-full p-2 border rounded-md" rows="3"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeEditModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

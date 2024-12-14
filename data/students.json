@@ -1,0 +1,52 @@
+{
+  "students": [
+    {
+      "id": "1734167825077",
+      "name": "معاذ شرف",
+      "password": "1234",
+      "currentSurah": "الزمر",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "11:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "ممتاز",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "ممتاز اللهم بارك , ومهذب في الحلقه وقدره استيعابو الايات جميله اللهم بارك",
+      "photo": "/uploads/1734167825054-869269646.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T09:17:05.078Z"
+    },
+    {
+      "id": "1734168086134",
+      "name": "مالك شرف",
+      "password": "1234",
+      "currentSurah": "الفرقان",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "11:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "ممتاز",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "ممتاز اللهم بارك و مريح في الحفظ وعنده قدر كبير من المعرفه اللهم بارك مقارنتا بعمره",
+      "photo": "/uploads/1734168086126-85386114.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T09:21:26.135Z"
+    }
+  ]
+}

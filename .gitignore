@@ -1,0 +1,6 @@
+.vercel
+*.log
+*.mp4
+*.zip
+node_modules/
+
