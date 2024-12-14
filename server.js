@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const jwt = require('jsonwebtoken'); // Add this line
+const jwt = require('jsonwebtoken'); 
 const app = express();
 const port = 3000;
 
@@ -351,70 +351,47 @@ app.delete('/api/students/:id', (req, res) => {
     }
 });
 
-// Student Authentication Routes
+// Student login endpoint
 app.post('/api/student/login', async (req, res) => {
     try {
         const { studentName, password } = req.body;
-        console.log('Login attempt for:', { studentName, password });
+        console.log('Login attempt for:', { studentName });
 
         // Read students data
         const studentsData = readStudentsData();
         
-        if (!studentsData || !studentsData.students) {
-            console.error('Invalid students data:', studentsData);
-            return res.status(500).json({
-                success: false,
-                error: 'خطأ في قراءة بيانات الطلاب'
+        // Find student with matching credentials
+        const student = studentsData.students.find(s => 
+            s.name.trim().toLowerCase() === studentName.trim().toLowerCase() && 
+            s.password === password
+        );
+
+        if (!student) {
+            console.log('Login failed: Invalid credentials');
+            return res.status(401).json({ 
+                success: false, 
+                error: 'اسم الطالب أو الرقم السري غير صحيح' 
             });
         }
 
-        console.log('Total students:', studentsData.students.length);
-        
-        // Print all students for debugging
-        studentsData.students.forEach(s => {
-            console.log('Student in DB:', {
-                name: s.name,
-                password: s.password
-            });
-        });
+        // Create JWT token
+        const token = jwt.sign(
+            { studentId: student.id, studentName: student.name },
+            'your-secret-key',
+            { expiresIn: '24h' }
+        );
 
-        // Find student
-        const student = studentsData.students.find(s => {
-            const nameMatch = s.name === studentName;
-            const passwordMatch = s.password === password;
-            
-            console.log('Comparing with student:', {
-                storedName: s.name,
-                inputName: studentName,
-                nameMatch,
-                passwordMatch
-            });
-            
-            return nameMatch && passwordMatch;
+        console.log('Login successful for student:', student.name);
+        res.json({
+            success: true,
+            token,
+            studentId: student.id
         });
-
-        if (student) {
-            console.log('Student found:', student.name);
-            // Create a simple token
-            const token = Buffer.from(`${student.id}:${Date.now()}`).toString('base64');
-            
-            res.json({
-                success: true,
-                token,
-                studentId: student.id
-            });
-        } else {
-            console.log('No matching student found');
-            res.status(401).json({
-                success: false,
-                error: 'اسم الطالب أو كلمة المرور غير صحيحة'
-            });
-        }
     } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'حدث خطأ في تسجيل الدخول'
+        res.status(500).json({ 
+            success: false, 
+            error: 'حدث خطأ في تسجيل الدخول' 
         });
     }
 });
