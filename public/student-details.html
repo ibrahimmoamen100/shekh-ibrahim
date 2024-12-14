@@ -97,6 +97,11 @@
     </div>
 
     <script>
+        // تحديد عنوان API بناءً على بيئة التشغيل
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : '';
+
         // التحقق من وجود token عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', async () => {
             const token = localStorage.getItem('studentToken');
@@ -108,7 +113,7 @@
             }
 
             try {
-                const response = await fetch(`/api/student/${studentId}`, {
+                const response = await fetch(`${API_URL}/api/student/${studentId}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
