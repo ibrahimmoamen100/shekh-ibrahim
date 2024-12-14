@@ -36,9 +36,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files
-app.use(express.static('public'));
-app.use('/uploads', express.static('uploads'));
-app.use('/images', express.static('images'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// Handle 404 errors for static files
+app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+        res.sendFile(path.join(__dirname, 'public', req.path));
+    } else {
+        next();
+    }
+});
 
 // Routes
 app.get('/', (req, res) => {

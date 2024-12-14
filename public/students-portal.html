@@ -69,8 +69,6 @@
             const studentName = document.getElementById('studentName').value.trim();
             const password = document.getElementById('password').value.trim();
             
-            console.log('Attempting login with:', { studentName, password });
-
             try {
                 const response = await fetch('/api/student/login', {
                     method: 'POST',
@@ -80,24 +78,23 @@
                     body: JSON.stringify({ studentName, password })
                 });
                 
-                console.log('Response status:', response.status);
-                
-                const data = await response.json();
-                console.log('Response data:', data);
-                
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('خطأ في الاتصال بالخادم');
+                }
+
                 if (data.success) {
-                    // حفظ البيانات في localStorage
                     localStorage.setItem('studentToken', data.token);
                     localStorage.setItem('studentId', data.studentId);
-                    
-                    // التوجيه إلى صفحة تفاصيل الطالب
                     window.location.href = '/student-details.html';
                 } else {
                     alert(data.error || 'حدث خطأ في تسجيل الدخول');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alert('حدث خطأ في تسجيل الدخول');
+                alert(error.message || 'حدث خطأ في تسجيل الدخول');
             }
         }
 
