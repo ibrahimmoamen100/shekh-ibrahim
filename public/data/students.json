@@ -1,0 +1,24 @@
+{
+  "students": [
+    {
+      "id": "1734167825077",
+      "name": "معاذ شرف",
+      "password": "1234",
+      "currentSurah": "الزمر",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "11:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "ممتاز",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "ممتاز اللهم بارك , ومهذب في الحلقه وقدره استيعابو الايات جميله اللهم بارك"
+    }
+  ]
+}

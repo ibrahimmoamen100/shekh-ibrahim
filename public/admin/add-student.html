@@ -129,6 +129,114 @@
     </div>
 
     <script>
+        // Function to load students data
+        async function loadStudentsData() {
+            try {
+                console.log('Attempting to load students data...');
+                const response = await fetch('../api/get_students.php', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data loaded successfully:', data);
+                return data.students || [];
+            } catch (error) {
+                console.error('Detailed error loading students data:', error);
+                alert('حدث خطأ أثناء تحميل بيانات الطلاب. الرجاء المحاولة مرة أخرى.');
+                return [];
+            }
+        }
+
+        // Function to save students data
+        async function saveStudentsData(students) {
+            try {
+                console.log('Attempting to save students data:', students);
+                const response = await fetch('../api/save_students.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ students: students })
+                });
+                
+                console.log('Save response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    return true;
+                } else {
+                    throw new Error('Failed to save data');
+                }
+            } catch (error) {
+                console.error('Detailed error saving students data:', error);
+                alert('حدث خطأ أثناء حفظ بيانات الطالب. الرجاء المحاولة مرة أخرى.');
+                return false;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+            
+            // التحقق من وجود الرقم السري
+            const password = document.getElementById('password').value;
+            if (!password) {
+                alert('الرجاء إدخال الرقم السري للطالب');
+                return;
+            }
+
+            // Create new student object
+            const newStudent = {
+                id: Date.now().toString(),
+                name: document.getElementById('name').value,
+                password: password,
+                currentSurah: document.getElementById('currentSurah').value,
+                schedule: [{
+                    day: document.getElementById('day').value,
+                    time: document.getElementById('time').value
+                }],
+                evaluation: "",
+                sessionsAttended: 0,
+                paymentType: document.querySelector('input[name="paymentType"]:checked').value,
+                notes: document.getElementById('notes').value
+            };
+
+            console.log('New student data:', newStudent);
+
+            try {
+                // Load existing students
+                const students = await loadStudentsData();
+                console.log('Existing students loaded:', students);
+                
+                // Add new student
+                students.push(newStudent);
+                
+                // Save updated data
+                const saved = await saveStudentsData(students);
+                
+                if (saved) {
+                    alert('تم إضافة الطالب بنجاح');
+                    window.location.href = 'students-list.html';
+                }
+            } catch (error) {
+                console.error('Error in form submission:', error);
+                alert('حدث خطأ أثناء إضافة الطالب. الرجاء المحاولة مرة أخرى.');
+            }
+        });
+
         // Toggle Password Visibility
         document.getElementById('togglePassword').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
@@ -142,51 +250,6 @@
                 passwordInput.type = 'password';
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
-            }
-        });
-
-        // Form Submission
-        document.getElementById('addStudentForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // التحقق من وجود الرقم السري
-            const password = document.getElementById('password').value;
-            if (!password) {
-                alert('الرجاء إدخال الرقم السري للطالب');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('name', document.getElementById('name').value);
-            formData.append('password', password);
-            formData.append('currentSurah', document.getElementById('currentSurah').value);
-            formData.append('day', document.getElementById('day').value);
-            formData.append('time', document.getElementById('time').value);
-            formData.append('paymentType', document.querySelector('input[name="paymentType"]:checked').value);
-            formData.append('notes', document.getElementById('notes').value);
-            
-            const photoFile = document.getElementById('photo').files[0];
-            if (photoFile) {
-                formData.append('photo', photoFile);
-            }
-
-            try {
-                const response = await fetch('/api/students', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    alert(`تم إضافة الطالب بنجاح. الرجاء الاحتفاظ بالرقم السري: ${password}`);
-                    window.location.href = '/admin/dashboard.html';
-                } else {
-                    const error = await response.json();
-                    alert(error.message || 'حدث خطأ في إضافة الطالب');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('حدث خطأ في إضافة الطالب');
             }
         });
     </script>
