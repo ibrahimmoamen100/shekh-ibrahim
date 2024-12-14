@@ -489,11 +489,7 @@ app.get('/api/student/:id', authenticateStudent, (req, res) => {
         const studentsData = readStudentsData();
         console.log('Found students:', studentsData.students.length);
         
-        const student = studentsData.students.find(s => {
-            console.log('Comparing IDs:', s.id, studentId);
-            return s.id === studentId;
-        });
-        
+        const student = studentsData.students.find(s => s.id === studentId);
         console.log('Found student:', student);
 
         if (!student) {
@@ -501,16 +497,12 @@ app.get('/api/student/:id', authenticateStudent, (req, res) => {
             return res.status(404).json({ error: 'الطالب غير موجود' });
         }
 
-        // إخفاء كلمة المرور قبل إرسال البيانات
+        // Remove sensitive data before sending
         const { password, ...studentData } = student;
-        
         console.log('Sending student data:', studentData);
-        res.json({
-            success: true,
-            student: studentData
-        });
+        res.json(studentData);
     } catch (error) {
-        console.error('Error fetching student details:', error);
+        console.error('Error getting student details:', error);
         res.status(500).json({ error: 'حدث خطأ في جلب بيانات الطالب' });
     }
 });
