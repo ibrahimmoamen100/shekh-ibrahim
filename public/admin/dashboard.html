@@ -125,7 +125,7 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
-                                <img class="h-10 w-10 rounded-full" src="${student.photo || '/images/default-avatar.png'}" alt="${student.name}">
+                                <img class="h-10 w-10 rounded-full" src="${student.photo || '/images/default.svg'}" alt="${student.name}">
                             </div>
                             <div class="mr-4">
                                 <div class="text-sm font-medium text-gray-900">${student.name}</div>
@@ -134,7 +134,13 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${student.Date}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">${student.currentSurah}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${student.lastSurah}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-900">

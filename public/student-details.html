@@ -53,13 +53,19 @@
                 <div class="bg-gray-50 rounded-lg p-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">المعلومات الأكاديمية</h2>
                     <div class="space-y-4">
-                        <div>
-                            <p class="text-gray-600">السورة الحالية</p>
-                            <p id="current-surah" class="font-semibold text-gray-800"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">التقييم</p>
-                            <p id="evaluation" class="font-semibold text-gray-800"></p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div>
+                                <p class="text-gray-600">السورة الحالية</p>
+                                <p id="current-surah" class="font-semibold text-gray-800"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">المراجعة</p>
+                                <p id="last-surah" class="font-semibold text-gray-800"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">التقييم</p>
+                                <p id="evaluation" class="font-semibold text-gray-800"></p>
+                            </div>
                         </div>
                         <div>
                             <p class="text-gray-600">عدد الحصص</p>
@@ -129,6 +135,7 @@
                 document.getElementById('student-name').textContent = student.name;
                 document.getElementById('student-id').textContent = student.id;
                 document.getElementById('current-surah').textContent = student.currentSurah;
+                document.getElementById('last-surah').textContent = student.lastSurah;
                 document.getElementById('evaluation').textContent = student.evaluation;
                 document.getElementById('sessions-attended').textContent = student.sessionsAttended + '  من 8 حلقات';
                 document.getElementById('payment-type').textContent = student.paymentType === 'perSession' ? 'بالحصة' : 'شهري';

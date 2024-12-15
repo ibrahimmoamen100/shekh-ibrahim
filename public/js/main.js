@@ -2,7 +2,7 @@
 const addStudentForm = document.getElementById('addStudentForm');
 const editStudentForm = document.getElementById('editStudentForm');
 const studentsList = document.getElementById('studentsList');
-const editModal = document.getElementById('editModal');
+const editModal = document.getElementById('editStudentModal');
 const currentPhoto = document.getElementById('currentPhoto');
 
 // Utility Functions
@@ -215,60 +215,52 @@ addStudentForm.addEventListener('submit', async (e) => {
 // Edit student form submission
 document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     try {
-        const form = e.target;
-        const studentId = form.querySelector('input[name="studentId"]').value;
-        const formData = new FormData(form);
-        
-        // Get schedule data
-        const scheduleItems = document.querySelectorAll('#editScheduleContainer .schedule-item');
-        const schedule = Array.from(scheduleItems).map(item => ({
-            day: item.querySelector('select[name="day"]').value,
-            time: item.querySelector('input[name="time"]').value
-        }));
-        
-        // Remove old schedule data from formData
-        formData.delete('day');
-        formData.delete('time');
-        
-        // Add each schedule item
-        schedule.forEach((item, index) => {
-            formData.append('day', item.day);
-            formData.append('time', item.time);
-        });
-        
-        // Remove studentId from formData as it's in the URL
-        formData.delete('studentId');
-        
-        // Log form data before sending
-        console.log('Form data before sending:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
+        const formData = new FormData(e.target);
+        const studentId = formData.get('studentId'); // Get the student ID from the form
+        const studentData = {
+            name: formData.get('name'),
+            currentSurah: formData.get('currentSurah'),
+            lastSurah: formData.get('lastSurah'),
+            evaluation: formData.get('evaluation'),
+            paymentType: formData.get('paymentType'),
+            notes: formData.get('notes')
+        };
+
+        // Only include password if it's not empty
+        const password = formData.get('password');
+        if (password && password.trim() !== '') {
+            studentData.password = password;
         }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('الرجاء تسجيل الدخول أولاً');
+            return;
+        }
+
+        console.log('Sending update with data:', studentData);
         
         const response = await fetch(`/api/students/${studentId}`, {
             method: 'PUT',
-            body: formData
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(studentData)
         });
-        
-        const responseData = await response.json();
-        console.log('Server response:', responseData);
 
         if (!response.ok) {
-            throw new Error(responseData.message || 'Failed to update student');
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update student');
         }
-        
-        const data = await response.json();
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
+
+        console.log('Update successful');
         closeEditModal();
         loadStudents();
     } catch (error) {
         console.error('Error updating student:', error);
-        alert('حدث خطأ أثناء تحديث بيانات الطالب');
+        alert('حدث خطأ أثناء تحديث بيانات الطالب: ' + error.message);
     }
 });
 
@@ -316,7 +308,7 @@ function loadStudents() {
                     <td class="px-6 py-4 whitespace-normal">${student.notes || '-'}</td>
                     <td class="px-6 py-4 whitespace-nowrap sticky left-0 bg-white">
                         <div class="flex space-x-2">
-                            <button onclick="editStudent('${student.id}')" class="text-blue-600 hover:text-blue-800 ml-2">تعديل</button>
+                            <button onclick="openEditModal('${student.id}')" class="text-blue-600 hover:text-blue-800 ml-2">تعديل</button>
                             <button onclick="deleteStudent('${student.id}')" class="text-red-600 hover:text-red-800">حذف</button>
                         </div>
                     </td>
@@ -331,9 +323,20 @@ function loadStudents() {
 }
 
 // Edit student
-async function editStudent(studentId) {
+async function openEditModal(studentId) {
     try {
-        const response = await fetch(`/api/students/${studentId}`);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('الرجاء تسجيل الدخول أولاً');
+            return;
+        }
+
+        const response = await fetch(`/api/student/${studentId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
         if (!response.ok) {
             throw new Error('Failed to fetch student details');
         }
@@ -346,9 +349,11 @@ async function editStudent(studentId) {
         
         // Fill the edit form with student data
         const form = document.getElementById('editStudentForm');
-        form.querySelector('input[name="studentId"]').value = student.id;
+        document.getElementById('editStudentId').value = student.id;
         form.querySelector('input[name="name"]').value = student.name;
         form.querySelector('input[name="currentSurah"]').value = student.currentSurah;
+        form.querySelector('input[name="lastSurah"]').value = student.lastSurah || '';
+        form.querySelector('select[name="evaluation"]').value = student.evaluation || '';
         form.querySelector('select[name="paymentType"]').value = student.paymentType;
         form.querySelector('textarea[name="notes"]').value = student.notes || '';
         
@@ -357,33 +362,35 @@ async function editStudent(studentId) {
         scheduleContainer.innerHTML = '';
         
         // Add schedule items
-        student.schedule.forEach(schedule => {
-            const newItem = document.createElement('div');
-            newItem.className = 'schedule-item grid grid-cols-2 gap-4';
-            newItem.innerHTML = `
-                <div>
-                    <label class="block text-sm">اليوم</label>
-                    <select name="day" class="w-full p-2 border rounded-md" required>
-                        <option value="">اختر اليوم</option>
-                        <option value="الأحد" ${schedule.day === 'الأحد' ? 'selected' : ''}>الأحد</option>
-                        <option value="الإثنين" ${schedule.day === 'الإثنين' ? 'selected' : ''}>الإثنين</option>
-                        <option value="الثلاثاء" ${schedule.day === 'الثلاثاء' ? 'selected' : ''}>الثلاثاء</option>
-                        <option value="الأربعاء" ${schedule.day === 'الأربعاء' ? 'selected' : ''}>الأربعاء</option>
-                        <option value="الخميس" ${schedule.day === 'الخميس' ? 'selected' : ''}>الخميس</option>
-                        <option value="الجمعة" ${schedule.day === 'الجمعة' ? 'selected' : ''}>الجمعة</option>
-                        <option value="السبت" ${schedule.day === 'السبت' ? 'selected' : ''}>السبت</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm">الوقت</label>
-                    <input type="time" name="time" class="w-full p-2 border rounded-md" value="${schedule.time}" required>
-                </div>
-                <button type="button" onclick="removeScheduleItem(this)" class="text-red-600 hover:text-red-800 text-sm">
-                    حذف الموعد
-                </button>
-            `;
-            scheduleContainer.appendChild(newItem);
-        });
+        if (student.schedule && student.schedule.length > 0) {
+            student.schedule.forEach(schedule => {
+                const newItem = document.createElement('div');
+                newItem.className = 'schedule-item grid grid-cols-2 gap-4';
+                newItem.innerHTML = `
+                    <div>
+                        <label class="block text-sm">اليوم</label>
+                        <select name="day" class="w-full p-2 border rounded-md" required>
+                            <option value="">اختر اليوم</option>
+                            <option value="الأحد" ${schedule.day === 'الأحد' ? 'selected' : ''}>الأحد</option>
+                            <option value="الإثنين" ${schedule.day === 'الإثنين' ? 'selected' : ''}>الإثنين</option>
+                            <option value="الثلاثاء" ${schedule.day === 'الثلاثاء' ? 'selected' : ''}>الثلاثاء</option>
+                            <option value="الأربعاء" ${schedule.day === 'الأربعاء' ? 'selected' : ''}>الأربعاء</option>
+                            <option value="الخميس" ${schedule.day === 'الخميس' ? 'selected' : ''}>الخميس</option>
+                            <option value="الجمعة" ${schedule.day === 'الجمعة' ? 'selected' : ''}>الجمعة</option>
+                            <option value="السبت" ${schedule.day === 'السبت' ? 'selected' : ''}>السبت</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm">الوقت</label>
+                        <input type="time" name="time" class="w-full p-2 border rounded-md" value="${schedule.time}" required>
+                    </div>
+                    <button type="button" onclick="removeScheduleItem(this)" class="text-red-600 hover:text-red-800 text-sm">
+                        حذف الموعد
+                    </button>
+                `;
+                scheduleContainer.appendChild(newItem);
+            });
+        }
         
         // Show current photo if exists
         const currentPhotoElement = document.getElementById('currentPhoto');
@@ -395,21 +402,17 @@ async function editStudent(studentId) {
         }
         
         // Show the modal
-        const editModal = document.getElementById('editModal');
-        editModal.classList.remove('hidden');
-        editModal.classList.add('flex');
+        const modal = document.getElementById('editStudentModal');
+        modal.style.display = 'block';
     } catch (error) {
-        console.error('Error fetching student details:', error);
-        alert('حدث خطأ أثناء تحميل بيانات الطالب');
+        console.error('Error:', error);
     }
 }
 
 // Close edit modal
 function closeEditModal() {
-    editModal.classList.add('hidden');
-    editModal.classList.remove('flex');
-    editStudentForm.reset();
-    currentPhoto.classList.add('hidden');
+    const modal = document.getElementById('editStudentModal');
+    modal.style.display = 'none';
 }
 
 // Update student evaluation

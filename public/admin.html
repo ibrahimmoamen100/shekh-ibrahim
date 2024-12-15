@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>نظام إدارة تعليم القرآن للشيخ إبراهيم - لوحة التحكم</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -10,199 +11,401 @@
         body {
             font-family: 'Tajawal', sans-serif;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
     </style>
-    <script>
-        // التحقق من كلمة المرور عند تحميل الصفحة
-        window.addEventListener('DOMContentLoaded', function() {
-            const password = prompt("الرجاء إدخال كلمة المرور للدخول إلى لوحة الإدارة");
-            if (password !== "45086932") {
-                alert("كلمة المرور غير صحيحة");
-                window.location.href = "/";
-            }
-        });
-    </script>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-green-600 text-white shadow-lg mb-8">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <div class="text-xl font-bold">لوحة تحكم الإدارة</div>
-                <div class="space-x-4">
-                    <a href="/" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-lg">العودة للصفحة الرئيسية</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold text-center mb-8 text-green-600">نظام إدارة تعليم القرآن للشيخ إبراهيم</h1>
-        
-        <!-- إضافة طالب جديد -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-4">إضافة طالب جديد</h2>
-            <form id="addStudentForm" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm mb-1">اسم الطالب</label>
-                        <input type="text" name="name" required class="w-full p-2 border rounded-md">
-                    </div>
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">الرقم السري للطالب</label>
-                        <div class="relative">
-                            <input type="password" id="password" name="password" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                                placeholder="أدخل الرقم السري">
-                            <button type="button" id="togglePassword" 
-                                class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <!-- Login Form -->
+    <div id="loginForm" class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center text-green-600">تسجيل الدخول للوحة التحكم</h2>
+            <form id="adminLoginForm" class="space-y-4">
                 <div>
-            
-                    <div>
-                        <label class="block text-sm mb-1">السورة الحالية</label>
-                        <input type="text" name="currentSurah" required class="w-full p-2 border rounded-md">
-                    </div>
-                    <div>
-                        <label class="block text-sm mb-1">نوع الدفع</label>
-                        <select name="paymentType" required class="w-full p-2 border rounded-md">
-                            <option value="monthly">شهري</option>
-                            <option value="perSession">بالحلقة</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm mb-1">صورة الطالب</label>
-                        <input type="file" name="photo" accept="image/*" class="w-full p-2 border rounded-md">
-                    </div>
+                    <label class="block text-sm mb-1">كلمة المرور</label>
+                    <input type="password" id="adminPassword" required class="w-full p-2 border rounded-md">
                 </div>
-                
-                <div>
-                    <label class="block text-sm mb-1">المواعيد</label>
-                    <div id="scheduleContainer" class="space-y-2">
-                        <div class="schedule-item grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm">اليوم</label>
-                                <select name="day" class="w-full p-2 border rounded-md" required>
-                                    <option value="">اختر اليوم</option>
-                                    <option value="الأحد">الأحد</option>
-                                    <option value="الإثنين">الإثنين</option>
-                                    <option value="الثلاثاء">الثلاثاء</option>
-                                    <option value="الأربعاء">الأربعاء</option>
-                                    <option value="الخميس">الخميس</option>
-                                    <option value="الجمعة">الجمعة</option>
-                                    <option value="السبت">السبت</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm">الوقت</label>
-                                <input type="time" name="time" class="w-full p-2 border rounded-md" required>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" onclick="addScheduleItem()" class="mt-2 text-green-600 hover:text-green-800 text-sm">
-                        + إضافة موعد آخر
-                    </button>
-                </div>
-
-                <div>
-                    <label class="block text-sm mb-1">ملاحظات</label>
-                    <textarea name="notes" class="w-full p-2 border rounded-md" rows="3"></textarea>
-                </div>
-
-                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                    إضافة الطالب
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+                    تسجيل الدخول
                 </button>
             </form>
         </div>
+    </div>
 
-        <!-- قائمة الطلاب -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">قائمة الطلاب</h2>
-            <div class="overflow-x-auto max-w-full">
-                <div class="inline-block min-w-full shadow-md rounded-lg overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50">الصورة</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السورة الحالية</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المواعيد</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد الحلقات</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع الدفع</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حالة الدفع</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التقييم</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ملاحظات</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">إجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsList" class="bg-white divide-y divide-gray-200">
-                            <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
-                        </tbody>
-                    </table>
+    <!-- Admin Panel Content -->
+    <div id="adminContent" style="display: none;">
+        <!-- Navigation -->
+        <nav class="bg-green-600 text-white shadow-lg mb-8">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="text-xl font-bold">لوحة تحكم الإدارة</div>
+                    <div class="space-x-4">
+                        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg ml-4">تسجيل الخروج</button>
+                        <a href="/" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-lg">العودة للصفحة الرئيسية</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-3xl font-bold text-center mb-8 text-green-600">نظام إدارة تعليم القرآن للشيخ إبراهيم</h1>
+            
+            <!-- إضافة طالب جديد -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">إضافة طالب جديد</h2>
+                <form id="addStudentForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm mb-1">اسم الطالب</label>
+                            <input type="text" name="name" required class="w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">الرقم السري للطالب</label>
+                            <div class="relative">
+                                <input type="password" id="password" name="password" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                                    placeholder="أدخل الرقم السري">
+                                <button type="button" id="togglePassword" 
+                                    class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+        
+                        <div>
+                            <label class="block text-sm mb-1">السورة الحالية</label>
+                            <input type="text" name="currentSurah" required class="w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1"> المراجعه</label>
+                            <input type="text" name="lastSurah" required class="w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">نوع الدفع</label>
+                            <select name="paymentType" required class="w-full p-2 border rounded-md">
+                                <option value="monthly">شهري</option>
+                                <option value="perSession">بالحلقة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">صورة الطالب</label>
+                            <input type="file" name="photo" accept="image/*" class="w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm mb-1">المواعيد</label>
+                        <div id="scheduleContainer" class="space-y-2">
+                            <div class="schedule-item grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm">اليوم</label>
+                                    <select name="day" class="w-full p-2 border rounded-md" required>
+                                        <option value="">اختر اليوم</option>
+                                        <option value="الأحد">الأحد</option>
+                                        <option value="الإثنين">الإثنين</option>
+                                        <option value="الثلاثاء">الثلاثاء</option>
+                                        <option value="الأربعاء">الأربعاء</option>
+                                        <option value="الخميس">الخميس</option>
+                                        <option value="الجمعة">الجمعة</option>
+                                        <option value="السبت">السبت</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm">الوقت</label>
+                                    <input type="time" name="time" class="w-full p-2 border rounded-md" required>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addScheduleItem()" class="mt-2 text-green-600 hover:text-green-800 text-sm">
+                            + إضافة موعد آخر
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm mb-1">ملاحظات</label>
+                        <textarea name="notes" class="w-full p-2 border rounded-md" rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        إضافة الطالب
+                    </button>
+                </form>
+            </div>
+
+            <!-- قائمة الطلاب -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">قائمة الطلاب</h2>
+                <div class="overflow-x-auto max-w-full">
+                    <div class="inline-block min-w-full shadow-md rounded-lg overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50">الصورة</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الاسم</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">السورة الحالية</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المواعيد</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عدد الحلقات</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع الدفع</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حالة الدفع</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التقييم</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">ملاحظات</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsList" class="bg-white divide-y divide-gray-200">
+                                <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal تعديل الطالب -->
-    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
-        <div class="bg-white p-6 rounded-lg w-full max-w-2xl mx-4">
-            <h2 class="text-xl font-semibold mb-4">تعديل بيانات الطالب</h2>
-            <form id="editStudentForm" class="space-y-4">
-                <input type="hidden" name="studentId">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Modal تعديل الطالب -->
+        <div id="editStudentModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditModal()">&times;</span>
+                <h2 class="text-2xl font-bold mb-4">تعديل بيانات الطالب</h2>
+                <form id="editStudentForm" class="space-y-4">
+                    <input type="hidden" name="studentId" id="editStudentId">
                     <div>
                         <label class="block text-sm mb-1">اسم الطالب</label>
                         <input type="text" name="name" required class="w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">كلمة المرور</label>
+                        <input type="password" name="password" class="w-full p-2 border rounded-md" placeholder="اتركه فارغاً للاحتفاظ بكلمة المرور الحالية">
                     </div>
                     <div>
                         <label class="block text-sm mb-1">السورة الحالية</label>
                         <input type="text" name="currentSurah" required class="w-full p-2 border rounded-md">
                     </div>
                     <div>
-                        <label class="block text-sm mb-1">نوع الدفع</label>
-                        <select name="paymentType" required class="w-full p-2 border rounded-md">
-                            <option value="monthly">شهري</option>
-                            <option value="perSession">بالحلقة</option>
+                        <label class="block text-sm mb-1">المراجعة</label>
+                        <input type="text" name="lastSurah" required class="w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">التقييم</label>
+                        <select name="evaluation" required class="w-full p-2 border rounded-md">
+                            <option value="ممتاز">ممتاز</option>
+                            <option value="جيد جداً">جيد جداً</option>
+                            <option value="جيد">جيد</option>
+                            <option value="مقبول">مقبول</option>
+                            <option value="ضعيف">ضعيف</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm mb-1">صورة الطالب</label>
-                        <input type="file" name="photo" accept="image/*" class="w-full p-2 border rounded-md">
-                        <img id="currentPhoto" src="" alt="" class="mt-2 w-20 h-20 object-cover rounded-full hidden">
+                        <label class="block text-sm mb-1">نوع الدفع</label>
+                        <select name="paymentType" class="w-full p-2 border rounded-md" onchange="toggleEditPaymentStatus(this)">
+                            <option value="مجاني">مجاني</option>
+                            <option value="شهري">شهري</option>
+                            <option value="سنوي">سنوي</option>
+                        </select>
                     </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm mb-1">المواعيد</label>
-                    <div id="editScheduleContainer" class="space-y-2">
-                        <!-- سيتم ملء هذا الجزء بواسطة JavaScript -->
+                    <div>
+                        <label class="block text-sm mb-1">المواعيد</label>
+                        <div id="editScheduleContainer" class="space-y-4">
+                            <!-- Schedule items will be added here -->
+                        </div>
+                        <button type="button" onclick="addEditScheduleItem()" class="mt-2 text-green-600 hover:text-green-800 text-sm">
+                            إضافة موعد جديد
+                        </button>
                     </div>
-                    <button type="button" onclick="addScheduleItemToEdit()" class="mt-2 text-green-600 hover:text-green-800 text-sm">
-                        + إضافة موعد آخر
-                    </button>
-                </div>
-
-                <div>
-                    <label class="block text-sm mb-1">ملاحظات</label>
-                    <textarea name="notes" class="w-full p-2 border rounded-md" rows="3"></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-2">
-                    <button type="button" onclick="closeEditModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 ml-2">
-                        إلغاء
-                    </button>
+                    <div>
+                        <label class="block text-sm mb-1">ملاحظات</label>
+                        <textarea name="notes" class="w-full p-2 border rounded-md" rows="3"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1">الصورة الحالية</label>
+                        <img id="currentPhoto" src="" alt="صورة الطالب" class="max-w-xs mt-2 hidden">
+                        <input type="file" name="photo" accept="image/*" class="mt-2">
+                    </div>
                     <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                         حفظ التغييرات
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <script src="/js/main.js"></script>
-</body>
+        <script>
+            // Function to close the edit modal
+            function closeEditModal() {
+                document.getElementById('editStudentModal').style.display = 'none';
+            }
+
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('editStudentModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+            async function editStudent(studentId) {
+                selectedStudentId = studentId;
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        alert('الرجاء تسجيل الدخول أولاً');
+                        return;
+                    }
+
+                    const response = await fetch(`/api/students/${studentId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const student = await response.json();
+                        populateEditForm(student);
+                        document.getElementById('editStudentModal').style.display = 'block';
+                    } else {
+                        console.error('Failed to fetch student data');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            function populateEditForm(student) {
+                const form = document.getElementById('editStudentForm');
+                form.querySelector('input[name="name"]').value = student.name || '';
+                form.querySelector('input[name="currentSurah"]').value = student.currentSurah || '';
+                form.querySelector('input[name="lastSurah"]').value = student.lastSurah || '';
+                form.querySelector('select[name="evaluation"]').value = student.evaluation || 'ممتاز';
+                form.querySelector('select[name="paymentType"]').value = student.paymentType || 'شهري';
+                form.querySelector('textarea[name="notes"]').value = student.notes || '';
+                // Don't populate password field for security, but keep the current password if not changed
+                form.querySelector('input[name="password"]').placeholder = 'اتركه فارغاً للاحتفاظ بكلمة المرور الحالية';
+            }
+
+            document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const studentData = {
+                    name: formData.get('name'),
+                    currentSurah: formData.get('currentSurah'),
+                    lastSurah: formData.get('lastSurah'),
+                    evaluation: formData.get('evaluation'),
+                    paymentType: formData.get('paymentType'),
+                    notes: formData.get('notes')
+                };
+
+                // Only include password if it's not empty
+                const newPassword = formData.get('password');
+                if (newPassword) {
+                    studentData.password = newPassword;
+                }
+
+                try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        alert('الرجاء تسجيل الدخول أولاً');
+                        return;
+                    }
+
+                    const response = await fetch(`/api/students/${selectedStudentId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(studentData)
+                    });
+
+                    if (response.ok) {
+                        closeEditModal();
+                        loadStudents();
+                    } else {
+                        throw new Error('Failed to update student');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+        </script>
+
+        <script>
+            // Check for existing login
+            window.addEventListener('DOMContentLoaded', function() {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    showAdminPanel();
+                }
+            });
+
+            // Login form submission
+            document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const password = document.getElementById('adminPassword').value;
+                
+                try {
+                    const response = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ password })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        localStorage.setItem('token', data.token);
+                        showAdminPanel();
+                    } else {
+                        alert('كلمة المرور غير صحيحة');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('حدث خطأ في تسجيل الدخول');
+                }
+            });
+
+            function showAdminPanel() {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+            }
+
+            function logout() {
+                localStorage.removeItem('token');
+                window.location.reload();
+            }
+        </script>
+
+        <script src="/js/main.js"></script>
+    </body>
 </html>

@@ -3,7 +3,7 @@
     {
       "id": "1734167825077",
       "name": "معاذ شرف",
-      "password": "1234",
+      "password": "4508",
       "currentSurah": "الزمر",
       "schedule": [
         {
@@ -22,12 +22,13 @@
       "photo": "/uploads/1734167825054-869269646.jpg",
       "currentMonthPaid": false,
       "lastPaymentDate": null,
-      "createdAt": "2024-12-14T09:17:05.078Z"
+      "createdAt": "2024-12-14T09:17:05.078Z",
+      "lastSurah": "النجم"
     },
     {
       "id": "1734168086134",
       "name": "مالك شرف",
-      "password": "1234",
+      "password": "4508",
       "currentSurah": "الفرقان",
       "schedule": [
         {
@@ -46,7 +47,8 @@
       "photo": "/uploads/1734215975720-998687586.jpg",
       "currentMonthPaid": false,
       "lastPaymentDate": null,
-      "createdAt": "2024-12-14T09:21:26.135Z"
+      "createdAt": "2024-12-14T09:21:26.135Z",
+      "lastSurah": "النجم"
     },
     {
       "id": "1734215942371",
@@ -246,7 +248,8 @@
       "photo": "/uploads/1734217497332-246598079.jpg",
       "currentMonthPaid": true,
       "lastPaymentDate": "2024-12-14T23:05:02.978Z",
-      "createdAt": "2024-12-14T23:04:57.335Z"
+      "createdAt": "2024-12-14T23:04:57.335Z",
+      "lastSurah": " النجم"
     },
     {
       "id": "1734217861054",
@@ -342,7 +345,8 @@
       "photo": "/uploads/1734262969532-438353737.jpg",
       "currentMonthPaid": true,
       "lastPaymentDate": "2024-12-15T11:43:09.523Z",
-      "createdAt": "2024-12-15T11:42:49.542Z"
+      "createdAt": "2024-12-15T11:42:49.542Z",
+      "lastSurah": " النجم"
     },
     {
       "id": "1734263567588",
@@ -367,6 +371,31 @@
       "currentMonthPaid": true,
       "lastPaymentDate": "2024-12-15T11:52:57.123Z",
       "createdAt": "2024-12-15T11:52:47.589Z"
+    },
+    {
+      "id": "1734263774917",
+      "name": "عبدالرحمن محمد",
+      "password": "01097000654",
+      "currentSurah": "المنافقون",
+      "schedule": [
+        {
+          "day": "الثلاثاء",
+          "time": "19:00"
+        },
+        {
+          "day": "الخميس",
+          "time": "19:00"
+        }
+      ],
+      "evaluation": "جديد",
+      "sessionsAttended": 0,
+      "paymentType": "monthly",
+      "notes": "لم يتم البدء بعد ",
+      "photo": "/uploads/1734263774910-620436924.svg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-15T11:56:14.917Z",
+      "lastSurah": " النجم"
     }
   ]
 }

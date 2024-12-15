@@ -46,8 +46,22 @@ const upload = multer({ storage: storage });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files from public directory
+app.use(express.static('public'));
+
+// Serve students.json from data directory
+app.use('/data/students.json', (req, res) => {
+    const data = readStudentsData();
+    // Remove sensitive data like passwords before sending
+    const sanitizedData = {
+        students: data.students.map(student => {
+            const { password, ...studentData } = student;
+            return studentData;
+        })
+    };
+    res.json(sanitizedData);
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
@@ -72,24 +86,30 @@ app.get('/admin', (req, res) => {
 // Helper Functions
 function readStudentsData() {
     const studentsFilePath = path.join(__dirname, 'data', 'students.json');
+    
     try {
-        if (!fs.existsSync(studentsFilePath)) {
-            const defaultData = { students: [] };
-            fs.writeFileSync(studentsFilePath, JSON.stringify(defaultData, null, 2), 'utf8');
-            return defaultData;
+        // محاولة قراءة الملف
+        if (fs.existsSync(studentsFilePath)) {
+            const data = fs.readFileSync(studentsFilePath, 'utf8');
+            return JSON.parse(data);
         }
-        const data = fs.readFileSync(studentsFilePath, 'utf8');
-        return JSON.parse(data);
+
+        // إذا لم يوجد الملف، نقوم بإنشاء ملف جديد
+        console.log('Creating new students data file');
+        const defaultData = { students: [] };
+        writeStudentsData(defaultData);
+        return defaultData;
     } catch (error) {
         console.error('Error reading students data:', error);
         const defaultData = { students: [] };
-        fs.writeFileSync(studentsFilePath, JSON.stringify(defaultData, null, 2), 'utf8');
+        writeStudentsData(defaultData);
         return defaultData;
     }
 }
 
 function writeStudentsData(data) {
     const studentsFilePath = path.join(__dirname, 'data', 'students.json');
+    
     try {
         // التأكد من وجود المجلد
         const dataDir = path.dirname(studentsFilePath);
@@ -114,7 +134,7 @@ function writeStudentsData(data) {
             throw new Error('Data verification failed');
         }
         
-        console.log(`Data written successfully to ${studentsFilePath}`);
+        console.log('Data written successfully to', studentsFilePath);
         return true;
     } catch (error) {
         console.error('Error writing students data:', error);
@@ -250,6 +270,7 @@ app.post('/api/students/new', upload.single('photo'), (req, res) => {
             name: req.body.name,
             password: req.body.password, // في الإنتاج يجب تشفير كلمة المرور
             currentSurah: req.body.currentSurah,
+            lastSurah: req.body.lastSurah,
             schedule: [{
                 day: req.body.day,
                 time: req.body.time
@@ -279,18 +300,22 @@ app.post('/api/students/new', upload.single('photo'), (req, res) => {
 
 app.put('/api/students/:id', upload.single('photo'), (req, res) => {
     try {
+        console.log('Received update request for student:', req.params.id);
+        console.log('Request body:', req.body);
+
         const data = readStudentsData();
         const studentId = req.params.id;
         const studentIndex = data.students.findIndex(s => s.id === studentId);
         
         if (studentIndex === -1) {
+            console.log('Student not found:', studentId);
             return res.status(404).json({ error: 'Student not found' });
         }
 
         let updatedStudent = { ...data.students[studentIndex] };
 
-        // Handle JSON request for payment status update
-        if (req.is('application/json')) {
+        // Handle payment status update
+        if (req.body.currentMonthPaid !== undefined || req.body.sessionsAttended !== undefined) {
             if (req.body.currentMonthPaid !== undefined) {
                 updatedStudent.currentMonthPaid = req.body.currentMonthPaid;
                 updatedStudent.lastPaymentDate = req.body.currentMonthPaid ? new Date().toISOString() : null;
@@ -299,30 +324,24 @@ app.put('/api/students/:id', upload.single('photo'), (req, res) => {
                 updatedStudent.sessionsAttended = req.body.sessionsAttended;
             }
         } 
-        // Handle form data request for full student update
+        // Handle full student update
         else {
-            const schedule = [];
-            if (req.body.day) {
-                const days = Array.isArray(req.body.day) ? req.body.day : [req.body.day];
-                const times = Array.isArray(req.body.time) ? req.body.time : [req.body.time];
-                
-                for (let i = 0; i < days.length; i++) {
-                    schedule.push({
-                        day: days[i],
-                        time: times[i]
-                    });
-                }
-            }
-
+            // Update basic info
             updatedStudent = {
                 ...updatedStudent,
                 name: req.body.name || updatedStudent.name,
                 currentSurah: req.body.currentSurah || updatedStudent.currentSurah,
-                schedule: schedule.length > 0 ? schedule : updatedStudent.schedule,
+                lastSurah: req.body.lastSurah || updatedStudent.lastSurah,
                 evaluation: req.body.evaluation || updatedStudent.evaluation,
                 paymentType: req.body.paymentType || updatedStudent.paymentType,
                 notes: req.body.notes || updatedStudent.notes
             };
+
+            // Handle password update
+            if (req.body.password && req.body.password.trim() !== '') {
+                console.log('Updating password for student:', studentId);
+                updatedStudent.password = req.body.password.trim();
+            }
 
             // Handle payment type change
             if (req.body.paymentType && req.body.paymentType !== data.students[studentIndex].paymentType) {
@@ -331,6 +350,7 @@ app.put('/api/students/:id', upload.single('photo'), (req, res) => {
                 updatedStudent.sessionsAttended = 0;
             }
 
+            // Handle photo update
             if (req.file) {
                 if (data.students[studentIndex].photo) {
                     const oldPhotoPath = path.join(__dirname, 'public', data.students[studentIndex].photo);
@@ -342,12 +362,17 @@ app.put('/api/students/:id', upload.single('photo'), (req, res) => {
             }
         }
 
+        // Update the student data
         data.students[studentIndex] = updatedStudent;
+        
+        // Write to both files
         writeStudentsData(data);
+        
+        console.log('Student updated successfully:', updatedStudent);
         res.json(updatedStudent);
     } catch (error) {
         console.error('Error updating student:', error);
-        res.status(500).json({ error: 'Failed to update student' });
+        res.status(500).json({ error: 'Failed to update student', message: error.message });
     }
 });
 
@@ -419,31 +444,49 @@ app.post('/api/student/login', async (req, res) => {
 app.get('/api/students/:id', async (req, res) => {
     try {
         const studentId = req.params.id;
-        console.log('Fetching details for student ID:', studentId);
-
-        // Read students data
-        const studentsData = readStudentsData();
         
-        // Find student
+        if (!studentId) {
+            return res.status(400).json({ error: 'معرف الطالب مطلوب' });
+        }
+        
+        const studentsData = readStudentsData();
         const student = studentsData.students.find(s => s.id === studentId);
-        console.log('Student found:', student ? 'Yes' : 'No');
 
-        if (student) {
-            // Remove sensitive data
-            const { password, ...studentData } = student;
-            res.json(studentData);
-        } else {
-            res.status(404).json({
+        if (!student) {
+            return res.status(404).json({
                 success: false,
                 error: 'الطالب غير موجود'
             });
         }
+
+        // Send all student data except password
+        const { password, ...studentData } = student;
+        res.json(studentData);
     } catch (error) {
         console.error('Error fetching student details:', error);
         res.status(500).json({
             success: false,
             error: 'حدث خطأ في جلب بيانات الطالب'
         });
+    }
+});
+
+// Admin login endpoint
+app.post('/api/admin/login', (req, res) => {
+    try {
+        const { password } = req.body;
+        
+        // Check if password is correct
+        if (password === '45086932') {
+            // Generate a simple token
+            const token = 'admin_' + Date.now();
+            res.json({ token });
+        } else {
+            res.status(401).json({ error: 'كلمة المرور غير صحيحة' });
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({ error: 'حدث خطأ في تسجيل الدخول' });
     }
 });
 
@@ -497,32 +540,23 @@ function authenticateStudent(req, res, next) {
 
 app.get('/api/student/:id', authenticateStudent, (req, res) => {
     try {
-        console.log('Getting student details for ID:', req.params.id);
         const studentId = req.params.id;
         
         if (!studentId) {
-            console.log('No student ID provided');
             return res.status(400).json({ error: 'معرف الطالب مطلوب' });
         }
         
-        // قراءة بيانات الطلاب من الملف
         const studentsData = readStudentsData();
-        console.log('Found students:', studentsData.students.length);
-        
         const student = studentsData.students.find(s => s.id === studentId);
-        console.log('Found student:', student);
 
         if (!student) {
-            console.log('Student not found');
             return res.status(404).json({ error: 'الطالب غير موجود' });
         }
 
-        // Remove sensitive data before sending
+        // Send all student data except password
         const { password, ...studentData } = student;
-        console.log('Sending student data:', studentData);
         res.json(studentData);
     } catch (error) {
-        console.error('Error getting student details:', error);
         res.status(500).json({ error: 'حدث خطأ في جلب بيانات الطالب' });
     }
 });
