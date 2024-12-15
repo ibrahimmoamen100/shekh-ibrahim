@@ -447,6 +447,26 @@ app.get('/api/students/:id', async (req, res) => {
     }
 });
 
+// إضافة نقطة نهاية للطلاب المتميزين
+app.get('/api/outstanding-students', (req, res) => {
+    try {
+        const studentsData = readStudentsData();
+        const outstandingStudents = studentsData.students
+            .filter(student => student.evaluation === 'ممتاز')
+            .map(student => ({
+                id: student.id,
+                name: student.name,
+                currentSurah: student.currentSurah,
+                photo: student.photo
+            }));
+
+        res.json(outstandingStudents);
+    } catch (error) {
+        console.error('Error fetching outstanding students:', error);
+        res.status(500).json({ error: 'حدث خطأ في جلب بيانات الطلاب المتميزين' });
+    }
+});
+
 // Middleware للتحقق من الـ token
 function authenticateStudent(req, res, next) {
     try {
@@ -513,6 +533,26 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: 'Internal server error' });
 });
 
+// إضافة نقطة نهاية للطلاب المتميزين
+app.get('/api/outstanding-students', (req, res) => {
+    try {
+        const studentsData = readStudentsData();
+        const outstandingStudents = studentsData.students
+            .filter(student => student.evaluation === 'ممتاز')
+            .map(student => ({
+                id: student.id,
+                name: student.name,
+                currentSurah: student.currentSurah,
+                photo: student.photo
+            }));
+
+        res.json(outstandingStudents);
+    } catch (error) {
+        console.error('Error fetching outstanding students:', error);
+        res.status(500).json({ error: 'حدث خطأ في جلب بيانات الطلاب المتميزين' });
+    }
+});
+
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server is running on port ${port}`);
 });

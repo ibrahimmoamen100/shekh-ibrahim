@@ -23,9 +23,9 @@
     <nav class="bg-green-600 text-white shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
-                <div class="text-xl font-bold">حلقات تحفيظ القرآن</div>
+                <div class="text-xl font-bold"><img src="/images/logo.png" alt="شعار حلقات تحفيظ القرآن" class="h-28"> </div>
                 <div class="space-x-4">
-                    <a href="/admin.html" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-lg">تسجيل الدخول للإدارة</a>
+                    <a href="#" onclick="checkAdminPassword()" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded-lg">تسجيل الدخول للإدارة</a>
                 </div>
             </div>
         </div>
@@ -37,8 +37,9 @@
             <h1 class="text-4xl md:text-6xl font-bold mb-6">حلقات تحفيظ القرآن الكريم</h1>
             <p class="text-xl mb-8">مع الشيخ إبراهيم</p>
             <div class="space-x-4 space-x-reverse">
-                <a href="#features" class="bg-white text-green-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-50 transition duration-300 inline-block">تعرف على حلقاتنا</a>
-                <a href="/students-portal.html" class="bg-green-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-800 transition duration-300 inline-block">متابعة الطلاب</a>
+
+                <a href="#features" class="bg-white text-green-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-50 transition duration-300 inline-block">تعرف على نظامنا</a>
+                <a href="/students-portal.html" class="bg-green-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-800 transition duration-300 inline-block">متابعة مستوي الطلاب</a>
             </div>
         </div>
     </section>
@@ -87,6 +88,10 @@
                     <ul class="space-y-3 text-gray-600">
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 ml-2"></i>
+                            تلقين الطالب كل ايه علي الاقل 3 مرات  
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 ml-2"></i>
                             مراجعة الحفظ السابق
                         </li>
                         <li class="flex items-center">
@@ -108,7 +113,7 @@
                         <li class="flex items-center">
                             <i class="fas fa-check text-green-500 ml-2"></i>
                               اتاحه الفرصه للطالب ان يسأل عن اي شئ في 
-                              دينه لمنع اي شبهه تعيقه عن عباده ربه بشكل افضل
+                              دينه         
                         </li>
                     </ul>
                 </div>
@@ -117,7 +122,7 @@
                     <ul class="space-y-3 text-gray-600">
                         <li class="flex items-center">
                             <i class="fas fa-star text-green-500 ml-2"></i>
-                            تقييم يومي للحفظ
+                            تقييم اسبوعي للحفظ
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-star text-green-500 ml-2"></i>
@@ -129,7 +134,15 @@
                         </li>
                         <li class="flex items-center">
                             <i class="fas fa-star text-green-500 ml-2"></i>
-                            مكافآت للمتميزين
+                              تنميه مستوي التدبر وفهم الايات
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-star text-green-500 ml-2"></i>
+                              تقييم مستوى الاخلاق
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-star text-green-500 ml-2"></i>
+ السؤال دوما علي الصلاه والعبادات
                         </li>
                     </ul>
                 </div>
@@ -173,9 +186,14 @@
                                 </li>
 
                             </ul>
+
+
+
                             <div class="pt-4">
-                                <a href="#contact" class="block w-full text-center bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                                <a href="https://wa.me/201024911062" class="block w-full text-center bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition duration-300">
                                     احجز حلقتك الآن
+                                    <i class="fab fa-whatsapp ml-2"></i>
+
                                 </a>
                             </div>
                         </div>
@@ -211,8 +229,10 @@
                                 </li>
                             </ul>
                             <div class="pt-4">
-                                <a href="#contact" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                                <a href="https://wa.me/201024911062" class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300">
                                     احجز حلقتك الآن
+                                    <i class="fab fa-whatsapp ml-2"></i>
+
                                 </a>
                             </div>
                         </div>
@@ -220,7 +240,18 @@
                 </div>
             </div>
         </section>
-    
+
+
+        
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-center mb-3 text-green-600">طلابنا المتميزون</h2>
+                <h1 class="text-base font-bold text-center mb-12 text-gray-400"> في الحفظ والادب والعبادات</h1>
+                <div id="outstanding-students" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- سيتم ملء هذا القسم بالطلاب المتميزين -->
+                </div>
+            </div>
+        </section>
 
     <!-- Contact Section -->
     <section class="py-16">
@@ -254,5 +285,47 @@
             <p>جميع الحقوق محفوظة &copy; 2024 - حلقات تحفيظ القرآن الكريم - الشيخ إبراهيم</p>
         </div>
     </footer>
+    <script>
+        function checkAdminPassword() {
+            const password = prompt("الرجاء إدخال كلمة المرور للدخول إلى لوحة الإدارة");
+            if (password === "45086932") {
+                window.location.href = "/admin.html";
+            } else if (password !== null) {
+                alert("كلمة المرور غير صحيحة");
+            }
+        }
+    </script>
+    <script>
+        // دالة لجلب وعرض الطلاب المتميزين
+        async function loadOutstandingStudents() {
+            try {
+                const response = await fetch('/api/outstanding-students');
+                const students = await response.json();
+                
+                const container = document.getElementById('outstanding-students');
+                container.innerHTML = students.map(student => `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300">
+                        <div class="relative pb-48">
+                            <img src="${student.photo || '/images/default-avatar.png'}" 
+                                 alt="${student.name}" 
+                                 class="absolute h-full w-full object-cover">
+                        </div>
+                        <div class="p-4 text-center">
+                            <h3 class="text-xl font-semibold mb-2">${student.name}</h3>
+                            <p class="text-gray-600">
+                                <i class="fas fa-book-quran ml-2"></i>
+                                وصل إلى سورة ${student.currentSurah}
+                            </p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading outstanding students:', error);
+            }
+        }
+
+        // تحميل الطلاب المتميزين عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', loadOutstandingStudents);
+    </script>
 </body>
 </html>
