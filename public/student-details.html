@@ -53,7 +53,7 @@
                 <div class="bg-gray-50 rounded-lg p-6">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">المعلومات الأكاديمية</h2>
                     <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                             <div>
                                 <p class="text-gray-600">السورة الحالية</p>
                                 <p id="current-surah" class="font-semibold text-gray-800"></p>
@@ -67,10 +67,7 @@
                                 <p id="evaluation" class="font-semibold text-gray-800"></p>
                             </div>
                         </div>
-                        <div>
-                            <p class="text-gray-600">عدد الحصص</p>
-                            <p id="sessions-attended" class="font-semibold text-gray-800"> حلقه</p>
-                        </div>
+
                     </div>
                 </div>
 
@@ -90,7 +87,20 @@
                             <p class="text-gray-600">تاريخ آخر دفعة</p>
                             <p id="last-payment-date" class="font-semibold text-gray-800"></p>
                         </div>
+                        <div>
+                            <p class="text-gray-600">عدد الحصص</p>
+                            <p id="sessions-attended" class="font-semibold text-gray-800"> حلقه</p>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+
+            <!-- Schedule Section -->
+            <div class="mt-8 bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">مواعيد الحلقات</h2>
+                <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Schedule items will be added here dynamically -->
                 </div>
             </div>
 
@@ -104,9 +114,9 @@
 
     <script>
         // تحديد عنوان API بناءً على بيئة التشغيل
-        const API_URL = window.location.hostname === 'localhost' 
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3000' 
-            : '';
+            : window.location.origin;
 
         // التحقق من وجود token عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', async () => {
@@ -119,33 +129,85 @@
             }
 
             try {
+                // Show loading spinner
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('main-content').style.display = 'none';
+
                 const response = await fetch(`${API_URL}/api/student/${studentId}`, {
+                    method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     }
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch student data');
+                    if (response.status === 401) {
+                        // Unauthorized - token expired or invalid
+                        localStorage.removeItem('studentToken');
+                        localStorage.removeItem('studentId');
+                        window.location.href = '/students-portal.html';
+                        return;
+                    }
+                    throw new Error(`خطأ في الخادم: ${response.status}`);
                 }
 
                 const student = await response.json();
+                if (!student) {
+                    throw new Error('لم يتم العثور على بيانات الطالب');
+                }
                 
                 // تحديث معلومات الطالب في الصفحة
-                document.getElementById('student-name').textContent = student.name;
-                document.getElementById('student-id').textContent = student.id;
-                document.getElementById('current-surah').textContent = student.currentSurah;
-                document.getElementById('last-surah').textContent = student.lastSurah;
-                document.getElementById('evaluation').textContent = student.evaluation;
-                document.getElementById('sessions-attended').textContent = student.sessionsAttended + '  من 8 حلقات';
-                document.getElementById('payment-type').textContent = student.paymentType === 'perSession' ? 'بالحصة' : 'شهري';
-                document.getElementById('current-month-paid').textContent = student.currentMonthPaid ? 'نعم' : 'لا';
-                document.getElementById('last-payment-date').textContent = student.lastPaymentDate ? new Date(student.lastPaymentDate).toLocaleDateString('ar-US') : 'لا يوجد';
-                document.getElementById('notes').textContent = student.notes || 'لا توجد ملاحظات';
                 
-                if (student.photo) {
-                    document.getElementById('student-image').src = student.photo;
+                function convertTo12Hour(time24) {
+                    const [hours, minutes] = time24.split(':');
+                    let hour = parseInt(hours);
+                    const ampm = hour >= 12 ? 'م' : 'ص';
+                    hour = hour % 12 || 12;
+                    return `${hour}:${minutes} ${ampm}`;
                 }
+
+                function displayStudentDetails(student) {
+                    document.getElementById('student-name').textContent = student.name;
+                    document.getElementById('student-id').textContent = student.id;
+                    document.getElementById('current-surah').textContent = student.currentSurah;
+                    document.getElementById('last-surah').textContent = student.lastSurah;
+                    document.getElementById('evaluation').textContent = student.evaluation;
+                    document.getElementById('sessions-attended').textContent = student.sessionsAttended + '  من 8 حلقات';
+                    document.getElementById('payment-type').textContent = student.paymentType === 'perSession' ? 'بالحصة' : 'شهري';
+                    document.getElementById('current-month-paid').textContent = student.currentMonthPaid ? 'نعم' : 'لا';
+                    document.getElementById('last-payment-date').textContent = student.lastPaymentDate ? new Date(student.lastPaymentDate).toLocaleDateString('ar-US') : 'لا يوجد';
+                    document.getElementById('notes').textContent = student.notes || 'لا توجد ملاحظات';
+                    
+                    if (student.photo) {
+                        document.getElementById('student-image').src = student.photo;
+                    }
+
+                    // Add schedule display
+                    const scheduleContainer = document.getElementById('schedule-container');
+                    scheduleContainer.innerHTML = ''; // Clear existing schedules
+                    
+                    if (student.schedule && student.schedule.length > 0) {
+                        student.schedule.forEach(schedule => {
+                            const scheduleItem = document.createElement('div');
+                            scheduleItem.className = 'bg-white p-4 rounded-lg shadow';
+                            scheduleItem.innerHTML = `
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-green-500 ml-2"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${schedule.day}</p>
+                                        <p class="text-gray-600">${convertTo12Hour(schedule.time)}</p>
+                                    </div>
+                                </div>
+                            `;
+                            scheduleContainer.appendChild(scheduleItem);
+                        });
+                    } else {
+                        scheduleContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">لا توجد مواعيد محددة</p>';
+                    }
+                }
+
+                displayStudentDetails(student);
 
                 // إخفاء شاشة التحميل وإظهار المحتوى
                 document.getElementById('loading').style.display = 'none';

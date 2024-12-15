@@ -155,29 +155,24 @@ app.get('/api/students', (req, res) => {
 
 app.get('/api/students/:id', (req, res) => {
     try {
-        console.log('Getting student details for ID:', req.params.id);
+        const studentId = req.params.id;
+        console.log('Fetching details for student:', studentId);
+
         const data = readStudentsData();
-        console.log('Total students found:', data.students.length);
-        
-        const student = data.students.find(s => {
-            console.log('Comparing:', s.id, req.params.id);
-            return s.id === req.params.id;
-        });
-        
-        console.log('Found student:', student);
-        
+        const student = data.students.find(s => s.id === studentId);
+
         if (!student) {
-            console.log('Student not found');
+            console.log('Student not found:', studentId);
             return res.status(404).json({ error: 'الطالب غير موجود' });
         }
-        
-        // إخفاء كلمة المرور قبل إرسال البيانات
+
+        console.log('Found student:', student);
+        // Send all student data except password
         const { password, ...studentData } = student;
-        
         console.log('Sending student data:', studentData);
         res.json(studentData);
     } catch (error) {
-        console.error('Error getting student:', error);
+        console.error('Error fetching student details:', error);
         res.status(500).json({ error: 'حدث خطأ في جلب بيانات الطالب' });
     }
 });

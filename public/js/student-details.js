@@ -3,57 +3,96 @@ if (!localStorage.getItem('studentToken') || !localStorage.getItem('studentId'))
     window.location.href = '/students-portal.html';
 }
 
-async function fetchStudentDetails() {
+async function loadStudentDetails() {
     try {
-        const studentId = localStorage.getItem('studentId');
-        const token = localStorage.getItem('studentToken');
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('id');
         
-        console.log('Fetching details for student ID:', studentId);
-        
-        const response = await fetch(`/api/students/${studentId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        if (!studentId) {
+            console.error('No student ID provided');
+            return;
+        }
 
-        console.log('Response status:', response.status);
+        console.log('Fetching student details for ID:', studentId);
+        const response = await fetch(`/api/students/${studentId}`);
         
         if (!response.ok) {
             throw new Error('Failed to fetch student details');
         }
 
         const student = await response.json();
-        console.log('Student data:', student);
+        console.log('Received student data:', student);
+        
+        // Update basic information
+        document.getElementById('student-name').textContent = student.name;
+        document.getElementById('current-surah').textContent = student.currentSurah || 'لم يتم تحديد السورة';
+        document.getElementById('last-surah').textContent = student.lastSurah || 'لم يتم تحديد السورة';
+        document.getElementById('evaluation').textContent = student.evaluation || 'لم يتم التقييم';
+        
+        // Update payment information
+        document.getElementById('payment-type').textContent = student.paymentType || 'لم يتم تحديد نوع الدفع';
+        document.getElementById('payment-status').textContent = student.currentMonthPaid ? 'تم الدفع' : 'لم يتم الدفع';
+        document.getElementById('last-payment-date').textContent = student.lastPaymentDate ? new Date(student.lastPaymentDate).toLocaleDateString('ar-SA') : 'لا يوجد';
+        document.getElementById('sessions-attended').textContent = (student.sessionsAttended || 0) + ' حلقه';
 
-        // تحديث واجهة المستخدم مع بيانات الطالب
-        document.getElementById('student-name').textContent = student.name || 'غير محدد';
-        document.getElementById('student-id').textContent = student.id || 'غير محدد';
-        document.getElementById('current-surah').textContent = student.currentSurah || 'غير محدد';
-        document.getElementById('evaluation').textContent = student.evaluation || 'غير محدد';
-        document.getElementById('sessions-attended').textContent = student.sessionsAttended || 0;
-        document.getElementById('payment-type').textContent = student.paymentType === 'perSession' ? 'بالحصة' : 'شهري';
-        document.getElementById('current-month-paid').textContent = student.currentMonthPaid ? 'نعم' : 'لا';
-        document.getElementById('last-payment-date').textContent = student.lastPaymentDate || 'غير محدد';
-        document.getElementById('notes').textContent = student.notes || 'لا توجد ملاحظات';
-        
-        // تحديث صورة الطالب
-        const studentImage = document.getElementById('student-image');
+        // Update student photo
+        const studentPhoto = document.getElementById('student-image');
         if (student.photo) {
-            studentImage.src = student.photo;
+            studentPhoto.src = student.photo;
         } else {
-            studentImage.src = '/images/default-avatar.png';
+            studentPhoto.src = '/images/default-avatar.png';
         }
-        
-        // عرض القسم الرئيسي بعد تحميل البيانات
+
+        // Update schedule table
+        const scheduleTableBody = document.getElementById('schedule-table-body');
+        console.log('Schedule table body element:', scheduleTableBody);
+        console.log('Student schedule data:', student.schedule);
+
+        if (scheduleTableBody) {
+            scheduleTableBody.innerHTML = ''; // Clear existing rows
+
+            if (student.schedule && student.schedule.length > 0) {
+                console.log('Adding schedule rows...');
+                student.schedule.forEach(scheduleItem => {
+                    console.log('Adding schedule item:', scheduleItem);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                            ${scheduleItem.day}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                            ${scheduleItem.time}
+                        </td>
+                    `;
+                    scheduleTableBody.appendChild(row);
+                });
+            } else {
+                console.log('No schedule data, adding empty message');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="2" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                        لا توجد مواعيد محددة
+                    </td>
+                `;
+                scheduleTableBody.appendChild(row);
+            }
+        } else {
+            console.error('Schedule table body element not found!');
+        }
+
+        // Hide loading spinner and show content
         document.getElementById('loading').style.display = 'none';
         document.getElementById('main-content').style.display = 'block';
 
     } catch (error) {
-        console.error('Error fetching student details:', error);
-        alert('حدث خطأ في جلب بيانات الطالب');
-        window.location.href = '/students-portal.html';
+        console.error('Error loading student details:', error);
+        alert('حدث خطأ أثناء تحميل بيانات الطالب');
+        document.getElementById('loading').style.display = 'none';
     }
 }
+
+// Load student details when the page loads
+document.addEventListener('DOMContentLoaded', loadStudentDetails);
 
 // تسجيل الخروج
 document.getElementById('logout-button').addEventListener('click', () => {
@@ -61,6 +100,3 @@ document.getElementById('logout-button').addEventListener('click', () => {
     localStorage.removeItem('studentId');
     window.location.href = '/students-portal.html';
 });
-
-// جلب بيانات الطالب عند تحميل الصفحة
-fetchStudentDetails();
