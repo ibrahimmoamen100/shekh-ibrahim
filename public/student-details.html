@@ -18,7 +18,7 @@
     <nav class="bg-green-600 text-white shadow-lg">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center py-4">
-                <a href="/" class="text-xl font-bold">حلقات تحفيظ القرآن</a>
+                <a href="/" class="text-xl font-bold"><img src="/images/logo.png" alt="شعار حلقات تحفيظ القرآن" class="h-28">  </a>
                 <button id="logout-button" class="hover:text-green-200">
                     <i class="fas fa-sign-out-alt ml-2"></i>
                     تسجيل الخروج
@@ -63,7 +63,7 @@
                         </div>
                         <div>
                             <p class="text-gray-600">عدد الحصص</p>
-                            <p id="sessions-attended" class="font-semibold text-gray-800"></p>
+                            <p id="sessions-attended" class="font-semibold text-gray-800"> حلقه</p>
                         </div>
                     </div>
                 </div>
@@ -130,10 +130,10 @@
                 document.getElementById('student-id').textContent = student.id;
                 document.getElementById('current-surah').textContent = student.currentSurah;
                 document.getElementById('evaluation').textContent = student.evaluation;
-                document.getElementById('sessions-attended').textContent = student.sessionsAttended;
+                document.getElementById('sessions-attended').textContent = student.sessionsAttended + '  من 8 حلقات';
                 document.getElementById('payment-type').textContent = student.paymentType === 'perSession' ? 'بالحصة' : 'شهري';
                 document.getElementById('current-month-paid').textContent = student.currentMonthPaid ? 'نعم' : 'لا';
-                document.getElementById('last-payment-date').textContent = student.lastPaymentDate ? new Date(student.lastPaymentDate).toLocaleDateString('ar-SA') : 'لا يوجد';
+                document.getElementById('last-payment-date').textContent = student.lastPaymentDate ? new Date(student.lastPaymentDate).toLocaleDateString('ar-US') : 'لا يوجد';
                 document.getElementById('notes').textContent = student.notes || 'لا توجد ملاحظات';
                 
                 if (student.photo) {
