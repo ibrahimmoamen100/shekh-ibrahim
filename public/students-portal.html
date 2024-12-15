@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الطلاب - حلقات تحفيظ القرآن</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-green-600 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="text-xl font-bold"><img src="/images/logo.png" alt="شعار حلقات تحفيظ القرآن" class="h-28">  </a>
+                <a href="/" class="hover:text-green-200">العودة للرئيسية</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div>
+                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">بوابة الطلاب</h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    قم بتسجيل الدخول لمتابعة تقدم الطالب
+                </p>
+            </div>
+            <form class="mt-8 space-y-6" id="loginForm">
+                <div class="rounded-md shadow-sm -space-y-px">
+                    <div>
+                        <label for="studentName" class="sr-only">اسم الطالب الثنائي</label>
+                        <input id="studentName" name="studentName" type="text" required 
+                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
+                            placeholder="اسم الطالب الثنائي (مثال: أحمد محمد)">
+                    </div>
+                    <div>
+                        <label for="password" class="sr-only">الرقم السري</label>
+                        <input id="password" name="password" type="password" required 
+                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm" 
+                            placeholder="الرقم السري">
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </span>
+                        تسجيل الدخول
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // تحديد عنوان API بناءً على بيئة التشغيل
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : '';
+
+        async function login(event) {
+            event.preventDefault();
+            
+            const studentName = document.getElementById('studentName').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            try {
+                const response = await fetch(`${API_URL}/api/student/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ studentName, password })
+                });
+                
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('خطأ في الاتصال بالخادم');
+                }
+
+                if (data.success) {
+                    localStorage.setItem('studentToken', data.token);
+                    localStorage.setItem('studentId', data.studentId);
+                    window.location.href = '/student-details.html';
+                } else {
+                    alert(data.error || 'حدث خطأ في تسجيل الدخول');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert(error.message || 'حدث خطأ في تسجيل الدخول');
+            }
+        }
+
+        // إضافة مستمع الحدث لنموذج تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', login);
+    </script>
+</body>
+</html>

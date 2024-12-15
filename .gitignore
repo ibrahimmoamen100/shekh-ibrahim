@@ -1,0 +1,7 @@
+.vercel
+.env
+.env.local
+*.log
+*.mp4
+*.zip
+node_modules/

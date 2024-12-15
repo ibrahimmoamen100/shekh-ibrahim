@@ -1,0 +1,402 @@
+{
+  "wirdRoutine": "صلي علي النبي : 50 مره",
+  "students": [
+    {
+      "id": "1734167825077",
+      "name": "معاذ شرف",
+      "password": "4508",
+      "currentSurah": "الزمر",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "11:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "ممتاز",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "ممتاز اللهم بارك , ومهذب في الحلقه وقدره استيعابو الايات جميله اللهم بارك",
+      "photo": "/uploads/1734167825054-869269646.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T09:17:05.078Z",
+      "lastSurah": "النجم"
+    },
+    {
+      "id": "1734168086134",
+      "name": "مالك شرف",
+      "password": "4508",
+      "currentSurah": "الفرقان",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "11:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "ممتاز",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "ممتاز اللهم بارك و مريح في الحفظ وعنده قدر كبير من المعرفه اللهم بارك مقارنتا بعمره",
+      "photo": "/uploads/1734215975720-998687586.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T09:21:26.135Z",
+      "lastSurah": "النجم"
+    },
+    {
+      "id": "1734215942371",
+      "name": "محمد احمد",
+      "password": "1234",
+      "currentSurah": "الطور",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "15:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ سوره الطور\r\nالمراجعه : سوره التحريم + البلد\r\n",
+      "photo": "/uploads/1734215942366-298097390.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T22:39:02.371Z"
+    },
+    {
+      "id": "1734216159737",
+      "name": "ادم احمد",
+      "password": "1234",
+      "currentSurah": "الحشر",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "13:30"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ سوره الحشر \r\nالمراجعه : المرسلات + البلد\r\n",
+      "photo": "/uploads/1734216159733-717627170.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T22:42:39.737Z"
+    },
+    {
+      "id": "1734216333655",
+      "name": "سامر محمد",
+      "password": "1234",
+      "currentSurah": "المدثر",
+      "schedule": [
+        {
+          "day": "الجمعة",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ المدثر الي 30 \r\nالمراجعه : البلد\r\n",
+      "photo": "/uploads/1734216333651-164846466.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T22:45:33.655Z"
+    },
+    {
+      "id": "1734216497238",
+      "name": "محمد اسامه",
+      "password": "1234",
+      "currentSurah": "المدثر ",
+      "schedule": [
+        {
+          "day": "الجمعة",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "جيد",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ المدثر الي 30 \r\nالمراجعه : البلد ",
+      "photo": "/uploads/1734216497235-725325124.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T22:48:17.238Z"
+    },
+    {
+      "id": "1734216856227",
+      "name": "سيف محمد",
+      "password": "1234",
+      "currentSurah": "المدثر",
+      "schedule": [
+        {
+          "day": "الجمعة",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "ضعيف",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ المدثر الي 30 \r\nالمراجعه : من الناس الي الاخلاص",
+      "photo": "/uploads/1734216856225-794253867.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-14T22:54:16.227Z"
+    },
+    {
+      "id": "1734217017651",
+      "name": "سليمان علي",
+      "password": "1234",
+      "currentSurah": "عم",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 5,
+      "paymentType": "monthly",
+      "notes": "حفظ عم \r\nالمراجعه : المطففين الي 13 + الناس + الفلق + الاخلاص",
+      "photo": "/uploads/1734217017631-151036659.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-14T22:57:04.343Z",
+      "createdAt": "2024-12-14T22:56:57.651Z"
+    },
+    {
+      "id": "1734217143624",
+      "name": "يحيي علي ",
+      "password": "1234",
+      "currentSurah": "عم",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "14:40"
+        },
+        {
+          "day": "الثلاثاء",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "جيد",
+      "sessionsAttended": 5,
+      "paymentType": "monthly",
+      "notes": "حفظ عم \r\nالمراجعه : المطففين الي 13 + الناس + الفلق + الاخلاص",
+      "photo": "/uploads/1734217143620-390059418.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-14T22:59:09.006Z",
+      "createdAt": "2024-12-14T22:59:03.625Z"
+    },
+    {
+      "id": "1734217237180",
+      "name": "معاذ ياسر",
+      "password": "1234",
+      "currentSurah": "عم",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "14:40"
+        },
+        {
+          "day": "الثلاثاء",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "جيد",
+      "sessionsAttended": 8,
+      "paymentType": "monthly",
+      "notes": "حفظ عم \r\nالمراجعه : المطففين الي 13 + الناس + الفلق + الاخلاص",
+      "photo": "/uploads/1734217237176-759354297.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-14T23:00:41.527Z",
+      "createdAt": "2024-12-14T23:00:37.180Z"
+    },
+    {
+      "id": "1734217497335",
+      "name": "عمار ياسر",
+      "password": "1234",
+      "currentSurah": "الرحمن",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "14:40"
+        },
+        {
+          "day": "الثلاثاء",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "جيد",
+      "sessionsAttended": 8,
+      "paymentType": "monthly",
+      "notes": "حفظ الرحمن كامله \r\nالمراجعه : المرسلات 19",
+      "photo": "/uploads/1734217497332-246598079.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-14T23:05:02.978Z",
+      "createdAt": "2024-12-14T23:04:57.335Z",
+      "lastSurah": " النجم"
+    },
+    {
+      "id": "1734217861054",
+      "name": "حفصه ياسر",
+      "password": "1234",
+      "currentSurah": "ق",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "14:40"
+        },
+        {
+          "day": "الثلاثاء",
+          "time": "14:40"
+        }
+      ],
+      "evaluation": "ممتاز",
+      "sessionsAttended": 8,
+      "paymentType": "monthly",
+      "notes": "حفظ ق \r\nالمراجعه : المرسلات الي 16",
+      "photo": "/uploads/1734217861050-314931354.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-14T23:11:08.407Z",
+      "createdAt": "2024-12-14T23:11:01.054Z"
+    },
+    {
+      "id": "1734218030299",
+      "name": "حمزه مصطفي",
+      "password": "1234",
+      "currentSurah": "نوح",
+      "schedule": [
+        {
+          "day": "السبت",
+          "time": "16:30"
+        },
+        {
+          "day": "الثلاثاء",
+          "time": "16:30"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 8,
+      "paymentType": "monthly",
+      "notes": "حفظ سوره نوح \r\nالمراجعه : المطففين الي 26",
+      "photo": "/uploads/1734218030296-488917955.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-14T23:13:55.591Z",
+      "createdAt": "2024-12-14T23:13:50.300Z"
+    },
+    {
+      "id": "1734262577575",
+      "name": "محمد جميل",
+      "password": "01129320831",
+      "currentSurah": "الفتح",
+      "schedule": [
+        {
+          "day": "الأحد",
+          "time": "19:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "19:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ سوره الفتح كامله  | \r\nمراجعه : التحريم اول وجه",
+      "photo": "/uploads/1734262577561-872029113.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-15T11:36:17.576Z"
+    },
+    {
+      "id": "1734262969541",
+      "name": "البراء احمد",
+      "password": "01117719044",
+      "currentSurah": "النجم",
+      "schedule": [
+        {
+          "day": "الأحد",
+          "time": "16:00"
+        },
+        {
+          "day": "الخميس",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 4,
+      "paymentType": "monthly",
+      "notes": "حفظ سوره النجم  | المراجعه : الاحزاب الوجه الثاني 2",
+      "photo": "/uploads/1734262969532-438353737.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-15T11:43:09.523Z",
+      "createdAt": "2024-12-15T11:42:49.542Z",
+      "lastSurah": " النجم"
+    },
+    {
+      "id": "1734263567588",
+      "name": "حمزه احمد",
+      "password": "01111774409",
+      "currentSurah": "الصف",
+      "schedule": [
+        {
+          "day": "الأحد",
+          "time": "16:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 5,
+      "paymentType": "monthly",
+      "notes": "حفظ سوره الصف || مراجعه : المدثر كامله",
+      "photo": "/uploads/1734263567570-790157365.svg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-15T23:37:51.649Z",
+      "createdAt": "2024-12-15T11:52:47.589Z"
+    },
+    {
+      "id": "1734263774917",
+      "name": "عبدالرحمن محمد",
+      "password": "01097000654",
+      "currentSurah": "المنافقون",
+      "schedule": [
+        {
+          "day": "الثلاثاء",
+          "time": "19:00"
+        },
+        {
+          "day": "الخميس",
+          "time": "19:00"
+        }
+      ],
+      "evaluation": "جيد",
+      "sessionsAttended": 0,
+      "paymentType": "monthly",
+      "notes": "لم يتم البدء بعد ",
+      "photo": "/uploads/1734263774910-620436924.svg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-15T11:56:14.917Z",
+      "lastSurah": " النجم"
+    }
+  ]
+}

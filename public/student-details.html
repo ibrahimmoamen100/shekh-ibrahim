@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الطالب - حلقات تحفيظ القرآن</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-green-600 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="text-xl font-bold"><img src="/images/logo.png" alt="شعار حلقات تحفيظ القرآن" class="h-28">  </a>
+                <button id="logout-button" class="hover:text-green-200">
+                    <i class="fas fa-sign-out-alt ml-2"></i>
+                    تسجيل الخروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
+        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
+    </div>
+
+
+
+
+
+    <!-- Main Content -->
+    <div id="main-content" class="container mx-auto px-4 py-8" style="display: none;">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
+
+                 <!-- Wird Routine Section -->
+                 <div class="my-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">الورد اليومي</h3>
+                    <div class="border-2 border-green-500 rounded-lg p-4 bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
+                        <div id="wird-routine" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+
+
+            <!-- Student Profile Header -->
+            <div class="flex items-center mb-8">
+                <img id="student-image" src="/images/default-avatar.png" alt="صورة الطالب" 
+                     class="w-32 h-32 rounded-full object-cover border-4 border-green-500">
+                <div class="mr-6">
+                    <h1 id="student-name" class="text-3xl font-bold text-gray-800 mb-2"></h1>
+                    <p class="text-gray-600">
+                        رقم الطالب: <span id="student-id" class="font-semibold"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Student Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Academic Info -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">المعلومات الأكاديمية</h2>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-gray-600">السورة الحالية</p>
+                                <p id="current-surah" class="font-semibold text-gray-800"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">المراجعة</p>
+                                <p id="last-surah" class="font-semibold text-gray-800"></p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">التقييم</p>
+                                <p id="evaluation" class="font-semibold text-gray-800"></p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">معلومات الدفع</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-600">نوع الدفع</p>
+                            <p id="payment-type" class="font-semibold text-gray-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">الشهر الحالي مدفوع</p>
+                            <p id="current-month-paid" class="font-semibold text-gray-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">تاريخ آخر دفعة</p>
+                            <p id="last-payment-date" class="font-semibold text-gray-800"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">عدد الحصص</p>
+                            <p id="sessions-attended" class="font-semibold text-gray-800"> حلقه</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Schedule Section -->
+            <div class="mt-8 bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">مواعيد الحلقات</h2>
+                
+   
+                <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Schedule items will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div class="mt-8 bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">الملاحظات</h2>
+                <p id="notes" class="text-gray-700"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحديد عنوان API بناءً على بيئة التشغيل
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000' 
+            : window.location.origin;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // التحقق من وجود رمز الطالب
+                const studentId = localStorage.getItem('studentId');
+                if (!studentId) {
+                    window.location.href = '/students-portal.html';
+                    return;
+                }
+
+                console.log('Fetching students.json...');
+                // جلب بيانات الطالب
+                const response = await fetch('/data/students.json');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                
+                const data = await response.json();
+                console.log('Loaded data:', data);
+                console.log('Wird Routine from data:', data.wirdRoutine);
+                
+                // البحث عن الطالب بواسطة المعرف
+                const student = data.students.find(s => s.id === studentId);
+                if (!student) {
+                    throw new Error('Student not found');
+                }
+
+                function convertTo12Hour(time24) {
+                    const [hours, minutes] = time24.split(':');
+                    let hour = parseInt(hours);
+                    const ampm = hour >= 12 ? 'م' : 'ص';
+                    hour = hour % 12 || 12;
+                    return `${hour}:${minutes} ${ampm}`;
+                }
+
+                function displayStudentDetails(student, data) {
+                    // Display student info
+                    document.getElementById('student-name').textContent = student.name;
+                    document.getElementById('student-id').textContent = student.id;
+                    document.getElementById('current-surah').textContent = student.currentSurah;
+                    document.getElementById('last-surah').textContent = student.lastSurah;
+                    document.getElementById('evaluation').textContent = student.evaluation;
+                    document.getElementById('payment-type').textContent = student.paymentType === 'perSession' ? 'بالحصة' : 'شهري';
+                    document.getElementById('current-month-paid').textContent = student.currentMonthPaid ? 'نعم' : 'لا';
+                    document.getElementById('last-payment-date').textContent = student.lastPaymentDate ? new Date(student.lastPaymentDate).toLocaleDateString('ar-US') : 'لا يوجد';
+                    document.getElementById('sessions-attended').textContent = student.sessionsAttended + '  من 8 حلقات';
+                    document.getElementById('notes').textContent = student.notes || 'لا توجد ملاحظات';
+                    
+                    if (student.photo) {
+                        document.getElementById('student-image').src = student.photo;
+                    }
+
+                    // Display Wird Routine
+                    const werdContainer = document.getElementById('wird-routine');
+                    werdContainer.innerHTML = ''; // Clear existing content
+
+                    console.log('Displaying wird routine:', data.wirdRoutine);
+
+                    // Create werd routine element
+                    const werdItem = document.createElement('div');
+                    werdItem.className = 'p-3 bg-green-50 rounded-md col-span-2';
+                    werdItem.innerHTML = `
+                        <div class="text-gray-700 text-lg text-right">${data.wirdRoutine || 'لا يوجد ورد يومي محدد'}</div>
+                    `;
+                    werdContainer.appendChild(werdItem);
+
+                    // Add schedule display
+                    const scheduleContainer = document.getElementById('schedule-container');
+                    scheduleContainer.innerHTML = ''; // Clear existing schedules
+                    
+                    if (student.schedule && student.schedule.length > 0) {
+                        student.schedule.forEach(schedule => {
+                            const scheduleItem = document.createElement('div');
+                            scheduleItem.className = 'bg-white p-4 rounded-lg shadow';
+                            scheduleItem.innerHTML = `
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-green-500 ml-2"></i>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">${schedule.day}</p>
+                                        <p class="text-gray-600">${convertTo12Hour(schedule.time)}</p>
+                                    </div>
+                                </div>
+                            `;
+                            scheduleContainer.appendChild(scheduleItem);
+                        });
+                    } else {
+                        scheduleContainer.innerHTML = '<p class="text-gray-600 col-span-full text-center">لا توجد مواعيد محددة</p>';
+                    }
+                }
+
+                // Pass both student and full data object
+                displayStudentDetails(student, data);
+
+                // Hide loading screen and show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+                alert('حدث خطأ في جلب بيانات الطالب');
+                window.location.href = '/students-portal.html';
+            }
+        });
+
+        // تسجيل الخروج
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('studentToken');
+            localStorage.removeItem('studentId');
+            window.location.href = '/students-portal.html';
+        });
+    </script>
+</body>
+</html>

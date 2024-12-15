@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة طالب جديد - حلقات تحفيظ القرآن</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-green-600 text-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="/" class="text-xl font-bold">حلقات تحفيظ القرآن</a>
+                <div class="space-x-4 space-x-reverse">
+                    <a href="/admin/dashboard.html" class="hover:text-green-200">لوحة التحكم</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add Student Form -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold mb-6">إضافة طالب جديد</h1>
+            
+            <form id="addStudentForm" class="space-y-6">
+                <!-- Student Name -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">اسم الطالب الثنائي</label>
+                    <input type="text" id="name" name="name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                        placeholder="مثال: أحمد محمد">
+                </div>
+
+                <!-- Password for Portal Access -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">الرقم السري لبوابة الطلاب</label>
+                    <div class="relative">
+                        <input type="password" id="password" name="password" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                            placeholder="أدخل الرقم السري">
+                        <button type="button" id="togglePassword" 
+                            class="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">سيتم استخدام هذا الرقم السري للدخول إلى بوابة الطلاب</p>
+                </div>
+
+                <!-- Current Surah -->
+                <div>
+                    <label for="currentSurah" class="block text-sm font-medium text-gray-700 mb-1">السورة الحالية</label>
+                    <input type="text" id="currentSurah" name="currentSurah" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500">
+                </div>
+
+                <!-- Schedule -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">موعد الحصة</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <select id="day" name="day" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500">
+                                <option value="">اختر اليوم</option>
+                                <option value="السبت">السبت</option>
+                                <option value="الأحد">الأحد</option>
+                                <option value="الاثنين">الاثنين</option>
+                                <option value="الثلاثاء">الثلاثاء</option>
+                                <option value="الأربعاء">الأربعاء</option>
+                                <option value="الخميس">الخميس</option>
+                                <option value="الجمعة">الجمعة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <input type="time" id="time" name="time" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">نوع الدفع</label>
+                    <div class="flex space-x-4 space-x-reverse">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="paymentType" value="monthly" checked
+                                class="form-radio text-green-600">
+                            <span class="mr-2">شهري</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="paymentType" value="perSession"
+                                class="form-radio text-green-600">
+                            <span class="mr-2">بالحصة</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Photo Upload -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">صورة الطالب</label>
+                    <input type="file" id="photo" name="photo" accept="image/*"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500">
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                    <textarea id="notes" name="notes" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                        class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        إضافة الطالب
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Function to load students data
+        async function loadStudentsData() {
+            try {
+                console.log('Attempting to load students data...');
+                const response = await fetch('../api/get_students.php', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data loaded successfully:', data);
+                return data.students || [];
+            } catch (error) {
+                console.error('Detailed error loading students data:', error);
+                alert('حدث خطأ أثناء تحميل بيانات الطلاب. الرجاء المحاولة مرة أخرى.');
+                return [];
+            }
+        }
+
+        // Function to save students data
+        async function saveStudentsData(students) {
+            try {
+                console.log('Attempting to save students data:', students);
+                const response = await fetch('../api/save_students.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ students: students })
+                });
+                
+                console.log('Save response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    return true;
+                } else {
+                    throw new Error('Failed to save data');
+                }
+            } catch (error) {
+                console.error('Detailed error saving students data:', error);
+                alert('حدث خطأ أثناء حفظ بيانات الطالب. الرجاء المحاولة مرة أخرى.');
+                return false;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submitted');
+            
+            // التحقق من وجود الرقم السري
+            const password = document.getElementById('password').value;
+            if (!password) {
+                alert('الرجاء إدخال الرقم السري للطالب');
+                return;
+            }
+
+            // Create new student object
+            const newStudent = {
+                id: Date.now().toString(),
+                name: document.getElementById('name').value,
+                password: password,
+                currentSurah: document.getElementById('currentSurah').value,
+                schedule: [{
+                    day: document.getElementById('day').value,
+                    time: document.getElementById('time').value
+                }],
+                evaluation: "",
+                sessionsAttended: 0,
+                paymentType: document.querySelector('input[name="paymentType"]:checked').value,
+                notes: document.getElementById('notes').value
+            };
+
+            console.log('New student data:', newStudent);
+
+            try {
+                // Load existing students
+                const students = await loadStudentsData();
+                console.log('Existing students loaded:', students);
+                
+                // Add new student
+                students.push(newStudent);
+                
+                // Save updated data
+                const saved = await saveStudentsData(students);
+                
+                if (saved) {
+                    alert('تم إضافة الطالب بنجاح');
+                    window.location.href = 'students-list.html';
+                }
+            } catch (error) {
+                console.error('Error in form submission:', error);
+                alert('حدث خطأ أثناء إضافة الطالب. الرجاء المحاولة مرة أخرى.');
+            }
+        });
+
+        // Toggle Password Visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    </script>
+</body>
+</html>
