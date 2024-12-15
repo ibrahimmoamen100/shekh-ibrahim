@@ -295,6 +295,78 @@
       "currentMonthPaid": true,
       "lastPaymentDate": "2024-12-14T23:13:55.591Z",
       "createdAt": "2024-12-14T23:13:50.300Z"
+    },
+    {
+      "id": "1734262577575",
+      "name": "محمد جميل",
+      "password": "01129320831",
+      "currentSurah": "الفتح",
+      "schedule": [
+        {
+          "day": "الأحد",
+          "time": "19:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "19:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 0,
+      "paymentType": "perSession",
+      "notes": "حفظ سوره الفتح كامله  | \r\nمراجعه : التحريم اول وجه",
+      "photo": "/uploads/1734262577561-872029113.jpg",
+      "currentMonthPaid": false,
+      "lastPaymentDate": null,
+      "createdAt": "2024-12-15T11:36:17.576Z"
+    },
+    {
+      "id": "1734262969541",
+      "name": "البراء احمد",
+      "password": "01117719044",
+      "currentSurah": "النجم",
+      "schedule": [
+        {
+          "day": "الأحد",
+          "time": "16:00"
+        },
+        {
+          "day": "الخميس",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 4,
+      "paymentType": "monthly",
+      "notes": "حفظ سوره النجم  | المراجعه : الاحزاب الوجه الثاني 2",
+      "photo": "/uploads/1734262969532-438353737.jpg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-15T11:43:09.523Z",
+      "createdAt": "2024-12-15T11:42:49.542Z"
+    },
+    {
+      "id": "1734263567588",
+      "name": "حمزه احمد",
+      "password": "01111774409",
+      "currentSurah": "الصف",
+      "schedule": [
+        {
+          "day": "الأحد",
+          "time": "16:00"
+        },
+        {
+          "day": "الأربعاء",
+          "time": "16:00"
+        }
+      ],
+      "evaluation": "جيد جداً",
+      "sessionsAttended": 5,
+      "paymentType": "monthly",
+      "notes": "حفظ سوره الصف || مراجعه : المدثر كامله",
+      "photo": "/uploads/1734263567570-790157365.svg",
+      "currentMonthPaid": true,
+      "lastPaymentDate": "2024-12-15T11:52:57.123Z",
+      "createdAt": "2024-12-15T11:52:47.589Z"
     }
   ]
 }
