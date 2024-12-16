@@ -30,9 +30,13 @@ const logsDir = path.join(__dirname, 'logs');
     }
 });
 
-// Configure multer for file uploads
+// Configure multer for file uploads with error handling
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+        // Ensure uploads directory exists
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
         cb(null, uploadsDir);
     },
     filename: function (req, file, cb) {
@@ -41,7 +45,34 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    fileFilter: function (req, file, cb) {
+        // Accept images only
+        if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
+            req.fileValidationError = 'Only image files are allowed!';
+            return cb(new Error('Only image files are allowed!'), false);
+        }
+        cb(null, true);
+    }
+}).single('photo');
+
+// Middleware to handle file upload
+const handleUpload = (req, res, next) => {
+    upload(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            // A Multer error occurred when uploading
+            console.error('Multer error:', err);
+            return res.status(500).json({ message: 'حدث خطأ أثناء رفع الصورة: ' + err.message });
+        } else if (err) {
+            // An unknown error occurred when uploading
+            console.error('Unknown upload error:', err);
+            return res.status(500).json({ message: 'حدث خطأ غير معروف أثناء رفع الصورة: ' + err.message });
+        }
+        // Everything went fine
+        next();
+    });
+};
 
 // Middleware to parse JSON requests
 app.use(express.json());
@@ -112,16 +143,6 @@ function readStudentsData() {
 function writeStudentsData(data) {
     try {
         const filePath = path.join(dataDir, 'students.json');
-        
-        // Ensure data has the correct structure
-        if (!data.students) {
-            data = { students: [], wirdRoutine: '', ...data };
-        }
-        if (!data.wirdRoutine) {
-            data.wirdRoutine = '';
-        }
-        
-        // Format JSON with indentation for readability
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
         return true;
     } catch (error) {
@@ -165,128 +186,75 @@ app.get('/api/students/:id', (req, res) => {
     }
 });
 
-app.post('/api/students', upload.single('photo'), (req, res) => {
+app.post('/api/students', handleUpload, (req, res) => {
     try {
-        console.log('Received request to add student');
-        console.log('Request body:', req.body);
-        console.log('File:', req.file);
-
-        // التحقق من البيانات المطلوبة
-        if (!req.body.name) {
-            return res.status(400).json({ message: 'الرجاء إدخال اسم الطالب' });
-        }
-        if (!req.body.password) {
-            return res.status(400).json({ message: 'الرجاء إدخال الرقم السري للطالب' });
-        }
-        if (!req.body.currentSurah) {
-            return res.status(400).json({ message: 'الرجاء إدخال السورة الحالية' });
-        }
-        
         const data = readStudentsData();
-        console.log('Current students data:', data);
-        
-        // إنشاء معرف فريد للطالب
         const studentId = Date.now().toString();
         
-        // معالجة جدول المواعيد
-        let schedule = [];
-        if (req.body.schedule) {
-            try {
-                schedule = JSON.parse(req.body.schedule);
-                console.log('Parsed schedule:', schedule);
-            } catch (error) {
-                console.error('Error parsing schedule:', error);
-                return res.status(400).json({ message: 'خطأ في تنسيق جدول المواعيد' });
+        // Parse schedule if it's a string
+        let schedule = req.body.schedule;
+        try {
+            if (typeof schedule === 'string') {
+                schedule = JSON.parse(schedule);
             }
+        } catch (error) {
+            console.error('Error parsing schedule:', error);
+            schedule = [];
         }
-        
+
         const newStudent = {
             id: studentId,
             name: req.body.name,
             password: req.body.password,
             currentSurah: req.body.currentSurah,
+            lastSurah: req.body.lastSurah || '',
             schedule: schedule,
-            evaluation: "جديد",
+            evaluation: req.body.evaluation || 'ممتاز',
             sessionsAttended: 0,
             paymentType: req.body.paymentType || 'perSession',
             notes: req.body.notes || '',
             photo: req.file ? `/uploads/${req.file.filename}` : null,
             currentMonthPaid: false,
             lastPaymentDate: null,
-            createdAt: new Date().toISOString(),
-            lastSurah: req.body.lastSurah || ''
+            createdAt: new Date().toISOString()
         };
 
-        console.log('New student data to be added:', newStudent);
-
-        // Ensure data has the correct structure
         if (!data.students) {
             data.students = [];
         }
-        if (!data.wirdRoutine) {
-            data.wirdRoutine = '';
+
+        // Validate required fields
+        const requiredFields = ['name', 'password', 'currentSurah'];
+        for (const field of requiredFields) {
+            if (!newStudent[field]) {
+                throw new Error(`الحقل "${field}" مطلوب`);
+            }
         }
 
         data.students.push(newStudent);
-        console.log('Updated students data before writing:', data);
         
-        const success = writeStudentsData(data);
-        if (!success) {
-            throw new Error('Failed to write student data');
-        }
+        try {
+            const success = writeStudentsData(data);
+            if (!success) {
+                throw new Error('فشل في حفظ بيانات الطالب - تأكد من صلاحيات الملف');
+            }
 
-        console.log('Data written successfully');
-        res.status(201).json({ 
-            message: 'تم إضافة الطالب بنجاح', 
-            student: newStudent 
-        });
+            console.log('Student data written successfully');
+            res.status(201).json({ 
+                message: 'تم إضافة الطالب بنجاح', 
+                student: newStudent 
+            });
+        } catch (error) {
+            console.error('Error writing student data:', error);
+            res.status(500).json({ message: 'حدث خطأ في حفظ بيانات الطالب: ' + error.message });
+        }
     } catch (error) {
         console.error('Error adding student:', error);
         res.status(500).json({ message: 'حدث خطأ في إضافة الطالب: ' + error.message });
     }
 });
 
-app.post('/api/students/new', upload.single('photo'), (req, res) => {
-    try {
-        const studentsData = readStudentsData();
-        
-        // إنشاء معرف فريد للطالب
-        const studentId = Date.now().toString();
-        
-        const newStudent = {
-            id: studentId,
-            name: req.body.name,
-            password: req.body.password, // في الإنتاج يجب تشفير كلمة المرور
-            currentSurah: req.body.currentSurah,
-            lastSurah: req.body.lastSurah,
-            schedule: [{
-                day: req.body.day,
-                time: req.body.time
-            }],
-            evaluation: "جديد",
-            sessionsAttended: 0,
-            paymentType: req.body.paymentType,
-            notes: req.body.notes,
-            photo: req.file ? `/uploads/${req.file.filename}` : null,
-            currentMonthPaid: false,
-            lastPaymentDate: null,
-            createdAt: new Date().toISOString(),
-            progress: 0,
-            lessons: [],
-            payments: []
-        };
-
-        studentsData.students.push(newStudent);
-        writeStudentsData(studentsData);
-
-        res.status(201).json({ message: 'تم إضافة الطالب بنجاح', student: newStudent });
-    } catch (error) {
-        console.error('Error adding student:', error);
-        res.status(500).json({ message: 'حدث خطأ في إضافة الطالب' });
-    }
-});
-
-app.put('/api/students/:id', upload.single('photo'), (req, res) => {
+app.put('/api/students/:id', handleUpload, (req, res) => {
     try {
         console.log('Received update request for student:', req.params.id);
         console.log('Request body:', req.body);

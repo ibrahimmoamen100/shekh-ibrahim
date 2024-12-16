@@ -5,12 +5,8 @@ const studentsList = document.getElementById('studentsList');
 const editModal = document.getElementById('editStudentModal');
 const currentPhoto = document.getElementById('currentPhoto');
 
-// Global variables
-let selectedStudentId = null;
-
 // Utility Functions
 function formatSchedule(schedule) {
-    if (!schedule || !Array.isArray(schedule)) return '-';
     return schedule.map(s => `${s.day} - ${s.time}`).join('<br>');
 }
 
@@ -43,7 +39,7 @@ function addScheduleItem() {
     container.appendChild(newItem);
 }
 
-function addEditScheduleItem(day, time) {
+function addEditScheduleItem() {
     const container = document.getElementById('editScheduleContainer');
     const newItem = document.createElement('div');
     newItem.className = 'schedule-item grid grid-cols-2 gap-4';
@@ -52,18 +48,18 @@ function addEditScheduleItem(day, time) {
             <label class="block text-sm">اليوم</label>
             <select name="day" class="w-full p-2 border rounded-md" required>
                 <option value="">اختر اليوم</option>
-                <option value="الأحد" ${day === 'الأحد' ? 'selected' : ''}>الأحد</option>
-                <option value="الإثنين" ${day === 'الإثنين' ? 'selected' : ''}>الإثنين</option>
-                <option value="الثلاثاء" ${day === 'الثلاثاء' ? 'selected' : ''}>الثلاثاء</option>
-                <option value="الأربعاء" ${day === 'الأربعاء' ? 'selected' : ''}>الأربعاء</option>
-                <option value="الخميس" ${day === 'الخميس' ? 'selected' : ''}>الخميس</option>
-                <option value="الجمعة" ${day === 'الجمعة' ? 'selected' : ''}>الجمعة</option>
-                <option value="السبت" ${day === 'السبت' ? 'selected' : ''}>السبت</option>
+                <option value="الأحد">الأحد</option>
+                <option value="الإثنين">الإثنين</option>
+                <option value="الثلاثاء">الثلاثاء</option>
+                <option value="الأربعاء">الأربعاء</option>
+                <option value="الخميس">الخميس</option>
+                <option value="الجمعة">الجمعة</option>
+                <option value="السبت">السبت</option>
             </select>
         </div>
         <div>
             <label class="block text-sm">الوقت</label>
-            <input type="time" name="time" class="w-full p-2 border rounded-md" value="${time}" required>
+            <input type="time" name="time" class="w-full p-2 border rounded-md" required>
         </div>
         <button type="button" onclick="removeScheduleItem(this)" class="text-red-600 hover:text-red-800 text-sm">
             حذف الموعد
@@ -75,18 +71,6 @@ function addEditScheduleItem(day, time) {
 function removeScheduleItem(button) {
     button.parentElement.remove();
 }
-
-function closeEditModal() {
-    document.getElementById('editStudentModal').style.display = 'none';
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('editStudentModal');
-    if (event.target === modal) {
-        closeEditModal();
-    }
-};
 
 // Toggle Payment Status Container
 function togglePaymentStatus(select) {
@@ -220,11 +204,20 @@ addStudentForm.addEventListener('submit', async (e) => {
             throw new Error(responseData.message || 'Failed to add student');
         }
 
+        // Reset form and show success message
         addStudentForm.reset();
-        loadStudents();
+        const scheduleContainer = document.getElementById('scheduleContainer');
+        if (scheduleContainer) {
+            scheduleContainer.innerHTML = '';
+            addScheduleItem(); // Add one empty schedule item
+        }
+        alert('تم إضافة الطالب بنجاح');
+        
+        // Reload students list
+        await loadStudents();
     } catch (error) {
         console.error('Error adding student:', error);
-        alert('حدث خطأ أثناء إضافة الطالب');
+        alert('حدث خطأ أثناء إضافة الطالب: ' + (error.message || ''));
     }
 });
 
@@ -233,7 +226,7 @@ document.getElementById('editStudentForm').addEventListener('submit', async (e) 
     e.preventDefault();
     try {
         const formData = new FormData(e.target);
-        const studentId = selectedStudentId; // Get the student ID from the global variable
+        const studentId = formData.get('studentId'); // Get the student ID from the form
         const studentData = {
             name: formData.get('name'),
             currentSurah: formData.get('currentSurah'),
@@ -309,7 +302,7 @@ function loadStudents() {
                             </button>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">${student.paymentType === 'monthly' ? 'شهري' : 'بالحلقة'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${student.paymentType === 'monthly' ? 'شهري' : student.paymentType === 'yearly' ? 'سنوي' : 'بالحلقة'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${formatPaymentStatus(student)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <select onchange="updateEvaluation('${student.id}', this.value)" class="border rounded p-1">
@@ -338,54 +331,97 @@ function loadStudents() {
         });
 }
 
+// Edit student
 async function openEditModal(studentId) {
     try {
-        console.log('Opening edit modal for student:', studentId);
-        selectedStudentId = studentId;
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('الرجاء تسجيل الدخول أولاً');
+            return;
+        }
 
-        const response = await fetch(`/api/students/${studentId}`);
+        const response = await fetch(`/api/students/${studentId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
         if (!response.ok) {
             throw new Error('Failed to fetch student details');
         }
-
+        
         const student = await response.json();
-        console.log('Fetched student data:', student);
-
+        console.log('Server response:', student);
+        if (!student) {
+            throw new Error('Student not found');
+        }
+        
         // Fill the edit form with student data
         const form = document.getElementById('editStudentForm');
-        form.querySelector('input[name="name"]').value = student.name || '';
-        form.querySelector('input[name="currentSurah"]').value = student.currentSurah || '';
+        document.getElementById('editStudentId').value = student.id;
+        form.querySelector('input[name="name"]').value = student.name;
+        form.querySelector('input[name="currentSurah"]').value = student.currentSurah;
         form.querySelector('input[name="lastSurah"]').value = student.lastSurah || '';
-        form.querySelector('select[name="evaluation"]').value = student.evaluation || 'جديد';
-        form.querySelector('select[name="paymentType"]').value = student.paymentType || 'perSession';
+        form.querySelector('select[name="evaluation"]').value = student.evaluation || '';
+        form.querySelector('select[name="paymentType"]').value = student.paymentType;
         form.querySelector('textarea[name="notes"]').value = student.notes || '';
         
         // Clear existing schedule items
         const scheduleContainer = document.getElementById('editScheduleContainer');
         scheduleContainer.innerHTML = '';
         
-        // Add existing schedule items
-        if (student.schedule && Array.isArray(student.schedule)) {
-            student.schedule.forEach(item => {
-                addEditScheduleItem(item.day, item.time);
+        // Add schedule items
+        if (student.schedule && student.schedule.length > 0) {
+            student.schedule.forEach(schedule => {
+                const newItem = document.createElement('div');
+                newItem.className = 'schedule-item grid grid-cols-2 gap-4';
+                newItem.innerHTML = `
+                    <div>
+                        <label class="block text-sm">اليوم</label>
+                        <select name="day" class="w-full p-2 border rounded-md" required>
+                            <option value="">اختر اليوم</option>
+                            <option value="الأحد" ${schedule.day === 'الأحد' ? 'selected' : ''}>الأحد</option>
+                            <option value="الإثنين" ${schedule.day === 'الإثنين' ? 'selected' : ''}>الإثنين</option>
+                            <option value="الثلاثاء" ${schedule.day === 'الثلاثاء' ? 'selected' : ''}>الثلاثاء</option>
+                            <option value="الأربعاء" ${schedule.day === 'الأربعاء' ? 'selected' : ''}>الأربعاء</option>
+                            <option value="الخميس" ${schedule.day === 'الخميس' ? 'selected' : ''}>الخميس</option>
+                            <option value="الجمعة" ${schedule.day === 'الجمعة' ? 'selected' : ''}>الجمعة</option>
+                            <option value="السبت" ${schedule.day === 'السبت' ? 'selected' : ''}>السبت</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm">الوقت</label>
+                        <input type="time" name="time" class="w-full p-2 border rounded-md" value="${schedule.time}" required>
+                    </div>
+                    <button type="button" onclick="removeScheduleItem(this)" class="text-red-600 hover:text-red-800 text-sm">
+                        حذف الموعد
+                    </button>
+                `;
+                scheduleContainer.appendChild(newItem);
             });
         }
-
+        
         // Show current photo if exists
         const currentPhotoElement = document.getElementById('currentPhoto');
         if (student.photo) {
             currentPhotoElement.src = student.photo;
-            currentPhotoElement.classList.remove('hidden');
+            currentPhotoElement.style.display = 'block';
         } else {
-            currentPhotoElement.classList.add('hidden');
+            currentPhotoElement.style.display = 'none';
         }
-
+        
         // Show the modal
-        document.getElementById('editStudentModal').style.display = 'block';
+        const modal = document.getElementById('editStudentModal');
+        modal.style.display = 'block';
     } catch (error) {
-        console.error('Error fetching student details:', error);
-        alert('حدث خطأ في جلب بيانات الطالب');
+        console.error('Error:', error);
     }
+}
+
+// Close edit modal
+function closeEditModal() {
+    const modal = document.getElementById('editStudentModal');
+    modal.style.display = 'none';
 }
 
 // Update student evaluation
@@ -439,3 +475,10 @@ async function deleteStudent(studentId) {
         }
     }
 }
+
+// Close modal when clicking outside
+editModal.addEventListener('click', (e) => {
+    if (e.target === editModal) {
+        closeEditModal();
+    }
+});

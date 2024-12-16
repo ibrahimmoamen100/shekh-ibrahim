@@ -131,9 +131,10 @@
                         </div>
                         <div>
                             <label class="block text-sm mb-1">نوع الدفع</label>
-                            <select name="paymentType" required class="w-full p-2 border rounded-md">
-                                <option value="monthly">شهري</option>
+                            <select name="paymentType" required class="w-full p-2 border rounded-md" onchange="togglePaymentStatus(this)">
                                 <option value="perSession">بالحلقة</option>
+                                <option value="monthly">شهري</option>
+                                <option value="yearly">سنوي</option>
                             </select>
                         </div>
                         <div>
@@ -211,11 +212,12 @@
         </div>
 
         <!-- Modal تعديل الطالب -->
-        <div id="editStudentModal" class="modal">
+        <div id="editStudentModal" class="modal ">
             <div class="modal-content max-w-6xl">
                 <span class="close" onclick="closeEditModal()">&times;</span>
                 <h2 class="text-2xl font-bold mb-4">تعديل بيانات الطالب</h2>
                 <form id="editStudentForm" class="space-y-4">
+                    <input type="hidden" name="studentId" id="editStudentId">
                     <div>
                         <label class="block text-sm mb-1">اسم الطالب</label>
                         <input type="text" name="name" required class="w-full p-2 border rounded-md">
@@ -230,12 +232,11 @@
                     </div>
                     <div>
                         <label class="block text-sm mb-1">المراجعة</label>
-                        <input type="text" name="lastSurah" class="w-full p-2 border rounded-md">
+                        <input type="text" name="lastSurah" required class="w-full p-2 border rounded-md">
                     </div>
                     <div>
                         <label class="block text-sm mb-1">التقييم</label>
                         <select name="evaluation" required class="w-full p-2 border rounded-md">
-                            <option value="جديد">جديد</option>
                             <option value="ممتاز">ممتاز</option>
                             <option value="جيد جداً">جيد جداً</option>
                             <option value="جيد">جيد</option>
@@ -248,7 +249,7 @@
                         <select name="paymentType" class="w-full p-2 border rounded-md" onchange="toggleEditPaymentStatus(this)">
                             <option value="perSession">بالحلقة</option>
                             <option value="monthly">شهري</option>
-                            <option value="free">مجاني</option>
+                            <option value="yearly">سنوي</option>
                         </select>
                     </div>
                     <div>
@@ -322,8 +323,8 @@
                 form.querySelector('input[name="name"]').value = student.name || '';
                 form.querySelector('input[name="currentSurah"]').value = student.currentSurah || '';
                 form.querySelector('input[name="lastSurah"]').value = student.lastSurah || '';
-                form.querySelector('select[name="evaluation"]').value = student.evaluation || 'جديد';
-                form.querySelector('select[name="paymentType"]').value = student.paymentType || 'perSession';
+                form.querySelector('select[name="evaluation"]').value = student.evaluation || 'ممتاز';
+                form.querySelector('select[name="paymentType"]').value = student.paymentType || 'monthly';
                 form.querySelector('textarea[name="notes"]').value = student.notes || '';
                 // Don't populate password field for security, but keep the current password if not changed
                 form.querySelector('input[name="password"]').placeholder = 'اتركه فارغاً للاحتفاظ بكلمة المرور الحالية';
