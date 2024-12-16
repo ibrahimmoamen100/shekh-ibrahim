@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تفاصيل الطالب - حلقات تحفيظ القرآن</title>
+    <title>تفاصيل الطالب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -13,253 +13,183 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-green-600 text-white shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <a href="/" class="text-xl font-bold"><img src="/images/logo.png" alt="شعار حلقات تحفيظ القرآن" class="h-28">  </a>
-                <button id="logout-button" class="hover:text-green-200">
-                    <i class="fas fa-sign-out-alt ml-2"></i>
+<body class="bg-gray-100">
+    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white">
+        جاري التحميل...
+    </div>
+
+    <div id="main-content" class="container mx-auto px-4 py-8" style="display: none;">
+        <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center space-x-4 mb-6">
+                <img id="student-image" src="/images/default-avatar.png" alt="صورة الطالب" class="w-24 h-24 rounded-full">
+                <div>
+                    <h1 id="student-name" class="text-2xl font-bold"></h1>
+                </div>
+            </div>
+
+            <!-- الورد اليومي -->
+            <div class="mb-6 p-4 bg-green-50 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2">الورد اليومي</h2>
+                <p id="wird-routine" class="text-gray-700"></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h2 class="text-xl font-semibold mb-4">معلومات الحفظ</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-600">السورة الحالية:</p>
+                            <p id="current-surah" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">آخر سورة:</p>
+                            <p id="last-surah" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">التقييم:</p>
+                            <p id="evaluation" class="font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-semibold mb-4">معلومات الدفع</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-gray-600">نوع الدفع:</p>
+                            <p id="payment-type" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">حالة الدفع للشهر الحالي:</p>
+                            <p id="payment-status" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">تاريخ آخر دفعة:</p>
+                            <p id="last-payment-date" class="font-medium"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">عدد الحلقات:</p>
+                            <p id="sessions-attended" class="font-medium"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold mb-4">جدول الحلقات</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    اليوم
+                                </th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    الوقت
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="schedule-table-body" class="bg-white divide-y divide-gray-200">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold mb-4">ملاحظات</h2>
+                <p id="notes" class="text-gray-700"></p>
+            </div>
+
+            <div class="mt-6">
+                <button id="logout-button" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
                     تسجيل الخروج
                 </button>
             </div>
         </div>
-    </nav>
-
-    <!-- Loading Spinner -->
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
     </div>
 
-    <!-- Main Content -->
-    <div id="main-content" class="container mx-auto px-4 py-8" style="display: none;">
-        <div class="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
-            <!-- Student Profile Header -->
-            <div class="flex items-center mb-8">
-                <img id="student-image" src="/images/default-avatar.png" alt="صورة الطالب" 
-                     class="w-32 h-32 rounded-full object-cover border-4 border-green-500">
-                <div class="mr-6">
-                    <h1 id="student-name" class="text-3xl font-bold text-gray-800 mb-2"></h1>
-                    <p class="text-gray-600">
-                        رقم الطالب: <span id="student-id" class="font-semibold"></span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- Student Details Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Academic Info -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">المعلومات الأكاديمية</h2>
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                            <div>
-                                <p class="text-gray-600">السورة الحالية</p>
-                                <p id="current-surah" class="font-semibold text-gray-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">المراجعة</p>
-                                <p id="last-surah" class="font-semibold text-gray-800"></p>
-                            </div>
-                            <div>
-                                <p class="text-gray-600">التقييم</p>
-                                <p id="evaluation" class="font-semibold text-gray-800"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Payment Info -->
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">معلومات الدفع</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-gray-600">نوع الدفع</p>
-                            <p id="payment-type" class="font-semibold text-gray-800"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">الشهر الحالي مدفوع</p>
-                            <p id="current-month-paid" class="font-semibold text-gray-800"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">تاريخ آخر دفعة</p>
-                            <p id="last-payment-date" class="font-semibold text-gray-800"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">عدد الحصص</p>
-                            <p id="sessions-attended" class="font-semibold text-gray-800"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Schedule Section -->
-            <div class="mt-8 bg-gray-50 rounded-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">مواعيد الحلقات</h2>
-                <div id="schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Schedule items will be added here dynamically -->
-                </div>
-            </div>
-
-            <!-- Notes Section -->
-            <div class="mt-8 bg-gray-50 rounded-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">الملاحظات</h2>
-                <p id="notes" class="text-gray-700"></p>
-            </div>
-
-            <!-- Wird Routine Section -->
-            <div class="mt-8 bg-gray-50 rounded-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">الورد اليومي</h2>
-                <div id="wird-routine" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- إضافة ملف البيانات -->
+    <script src="/js/students-data.js"></script>
+    
     <script>
-        // Main initialization
-        document.addEventListener('DOMContentLoaded', async () => {
+        function loadStudentDetails() {
             try {
-                // Get student ID from URL
-                const urlParams = new URLSearchParams(window.location.search);
-                const studentId = urlParams.get('id');
+                // الحصول على بيانات الطالب من التخزين المحلي
+                const studentData = JSON.parse(localStorage.getItem('studentData'));
+                const wirdRoutine = localStorage.getItem('wirdRoutine');
                 
-                // Check if student ID exists in URL
-                if (!studentId) {
-                    alert('معرف الطالب غير موجود');
+                if (!studentData) {
                     window.location.href = '/students-portal.html';
                     return;
                 }
 
-                // Check if student is logged in
-                const token = localStorage.getItem('studentToken');
-                const loggedInStudentId = localStorage.getItem('studentId');
-                
-                if (!token || loggedInStudentId !== studentId) {
-                    alert('الرجاء تسجيل الدخول أولاً');
-                    window.location.href = '/students-portal.html';
-                    return;
+                // تحديث معلومات الطالب
+                document.getElementById('student-name').textContent = studentData.name;
+                document.getElementById('wird-routine').textContent = wirdRoutine;
+                document.getElementById('current-surah').textContent = studentData.currentSurah || 'لم يتم تحديد السورة';
+                document.getElementById('last-surah').textContent = studentData.lastSurah || 'لم يتم تحديد السورة';
+                document.getElementById('evaluation').textContent = studentData.evaluation || 'لم يتم التقييم';
+                document.getElementById('payment-type').textContent = studentData.paymentType || 'لم يتم تحديد نوع الدفع';
+                document.getElementById('payment-status').textContent = studentData.currentMonthPaid ? 'تم الدفع' : 'لم يتم الدفع';
+                document.getElementById('last-payment-date').textContent = studentData.lastPaymentDate ? new Date(studentData.lastPaymentDate).toLocaleDateString('ar-SA') : 'لا يوجد';
+                document.getElementById('sessions-attended').textContent = (studentData.sessionsAttended || 0) + ' حلقه';
+                document.getElementById('notes').textContent = studentData.notes || 'لا توجد ملاحظات';
+
+                // تحديث صورة الطالب
+                const studentPhoto = document.getElementById('student-image');
+                if (studentData.photo) {
+                    studentPhoto.src = studentData.photo;
+                } else {
+                    studentPhoto.src = '/images/default-avatar.png';
                 }
 
-                // Fetch student data
-                const response = await fetch(`/api/students/${studentId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch student data');
+                // تحديث جدول الحلقات
+                const scheduleTableBody = document.getElementById('schedule-table-body');
+                scheduleTableBody.innerHTML = '';
+
+                if (studentData.schedule && studentData.schedule.length > 0) {
+                    studentData.schedule.forEach(scheduleItem => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                                ${scheduleItem.day}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
+                                ${scheduleItem.time}
+                            </td>
+                        `;
+                        scheduleTableBody.appendChild(row);
+                    });
+                } else {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td colspan="2" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                            لا توجد مواعيد محددة
+                        </td>
+                    `;
+                    scheduleTableBody.appendChild(row);
                 }
-                
-                const student = await response.json();
-                console.log('Loaded student data:', student);
 
-                // Fetch wird routine
-                const wirdResponse = await fetch('/api/wird-routine');
-                const wirdData = await wirdResponse.json();
-                student.wirdRoutine = wirdData.wirdRoutine;
-
-                displayStudentDetails(student);
-
+                // إخفاء شاشة التحميل وإظهار المحتوى
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
-            } catch (error) {
-                console.error('Error fetching student data:', error);
-                alert('حدث خطأ في جلب بيانات الطالب');
-                window.location.href = '/students-portal.html';
-            }
-        });
 
-        // Logout handler
+            } catch (error) {
+                console.error('Error loading student details:', error);
+                alert('حدث خطأ في تحميل بيانات الطالب');
+            }
+        }
+
+        // تسجيل الخروج
         document.getElementById('logout-button').addEventListener('click', () => {
-            localStorage.removeItem('studentToken');
+            localStorage.removeItem('studentData');
             localStorage.removeItem('studentId');
+            localStorage.removeItem('wirdRoutine');
             window.location.href = '/students-portal.html';
         });
 
-        function formatDate(dateString) {
-            if (!dateString) return 'لا يوجد';
-            const date = new Date(dateString);
-            const options = {
-                year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-            };
-            return new Intl.DateTimeFormat('ar-USA', options).format(date);
-        }
-
-        function displayStudentDetails(student) {
-            try {
-                console.log('Displaying student details:', student);
-                        
-                // Display student info
-                document.getElementById('student-name').textContent = student.name || '';
-                document.getElementById('student-id').textContent = student.id || '';
-                document.getElementById('current-surah').textContent = student.currentSurah || 'لم يتم تحديد السورة';
-                document.getElementById('last-surah').textContent = student.lastSurah || 'لم يتم تحديد السورة';
-                document.getElementById('evaluation').textContent = student.evaluation || 'لم يتم التقييم';
-                document.getElementById('payment-type').textContent = student.paymentType || 'لم يتم تحديد نوع الدفع';
-                document.getElementById('current-month-paid').textContent = student.currentMonthPaid ? 'تم الدفع' : 'لم يتم الدفع';
-                document.getElementById('last-payment-date').textContent = student.lastPaymentDate || 'لا يوجد';
-                document.getElementById('sessions-attended').textContent = (student.sessionsAttended || 0) + ' حلقه';
-                document.getElementById('notes').textContent = student.notes || 'لا توجد ملاحظات';
-
-                // Update student photo
-                const studentPhoto = document.getElementById('student-image');
-                if (student.photo) {
-                    studentPhoto.src = student.photo;
-                    studentPhoto.onerror = function() {
-                        this.src = '/images/default-avatar.png';
-                    };
-                }
-
-                // Display schedule
-                const scheduleContainer = document.getElementById('schedule-container');
-                if (scheduleContainer) {
-                    scheduleContainer.innerHTML = ''; // Clear existing schedule
-                    if (student.schedule && student.schedule.length > 0) {
-                        student.schedule.forEach(scheduleItem => {
-                            const scheduleDiv = document.createElement('div');
-                            scheduleDiv.className = 'bg-white rounded-lg shadow p-4 flex items-center';
-                            scheduleDiv.innerHTML = `
-                                <i class="fas fa-clock text-green-500 text-xl ml-4"></i>
-                                <div>
-                                    <p class="font-semibold text-gray-800">${scheduleItem.day}</p>
-                                    <p class="text-gray-600">${scheduleItem.time}</p>
-                                </div>
-                            `;
-                            scheduleContainer.appendChild(scheduleDiv);
-                        });
-                    } else {
-                        scheduleContainer.innerHTML = '<p class="text-gray-600">لم يتم تحديد مواعيد بعد</p>';
-                    }
-                }
-
-                // Display wird routine if available
-                const wirdContainer = document.getElementById('wird-routine');
-                if (wirdContainer) {
-                    if (student.wirdRoutine) {
-                        wirdContainer.innerHTML = `
-                            <div class="bg-white rounded-lg shadow p-4">
-                                <p class="font-semibold text-gray-800">${student.wirdRoutine}</p>
-                            </div>
-                        `;
-                    } else {
-                        wirdContainer.innerHTML = '<p class="text-gray-600">لم يتم تحديد الورد اليومي</p>';
-                    }
-                }
-
-                // Hide loading spinner and show content
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-            } catch (error) {
-                console.error('Error in displayStudentDetails:', error);
-                console.error('Student data:', student);
-                console.error('Stack trace:', error.stack);
-                alert('حدث خطأ في عرض بيانات الطالب');
-            }
-        }
+        // تحميل بيانات الطالب عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', loadStudentDetails);
     </script>
 </body>
 </html>

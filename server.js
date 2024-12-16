@@ -433,12 +433,19 @@ app.post('/api/student/login', async (req, res) => {
 
         // Read students data
         const studentsData = readStudentsData();
+        console.log('Students data:', studentsData);
         
         // Find student with matching credentials
-        const student = studentsData.students.find(s => 
-            s.name.trim().toLowerCase() === studentName.trim().toLowerCase() && 
-            s.password === password
-        );
+        const student = studentsData.students.find(s => {
+            const nameMatch = s.name.trim().toLowerCase() === studentName.trim().toLowerCase();
+            const passwordMatch = s.password === password;
+            console.log('Checking student:', { 
+                name: s.name, 
+                nameMatch, 
+                passwordMatch 
+            });
+            return nameMatch && passwordMatch;
+        });
 
         if (!student) {
             console.log('Login failed: Invalid credentials');
@@ -451,7 +458,7 @@ app.post('/api/student/login', async (req, res) => {
         // Create JWT token
         const token = jwt.sign(
             { studentId: student.id, studentName: student.name },
-            'your-secret-key',
+            process.env.JWT_SECRET || 'your-secret-key',
             { expiresIn: '24h' }
         );
 
