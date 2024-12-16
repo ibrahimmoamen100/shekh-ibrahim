@@ -24,7 +24,7 @@
       "currentMonthPaid": false,
       "lastPaymentDate": null,
       "createdAt": "2024-12-14T09:17:05.078Z",
-      "lastSurah": "النجم"
+      "lastSurah": "فصلت 28"
     },
     {
       "id": "1734168086134",
@@ -113,12 +113,13 @@
       ],
       "evaluation": "جيد جداً",
       "sessionsAttended": 0,
-      "paymentType": "perSession",
-      "notes": "حفظ المدثر الي 30 \r\nالمراجعه : البلد\r\n",
+      "paymentType": null,
+      "notes": "حفظ المدثر الي 30 \nالمراجعه : البلد\n",
       "photo": "/uploads/1734216333651-164846466.jpg",
       "currentMonthPaid": false,
       "lastPaymentDate": null,
-      "createdAt": "2024-12-14T22:45:33.655Z"
+      "createdAt": "2024-12-14T22:45:33.655Z",
+      "lastSurah": "البلد"
     },
     {
       "id": "1734216497238",

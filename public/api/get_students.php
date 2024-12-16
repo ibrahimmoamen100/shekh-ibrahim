@@ -4,11 +4,12 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-$file = '../data/students.json';
+$file = './data/students.json';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (file_exists($file)) {
         echo file_get_contents($file);
+
     } else {
         echo json_encode(['students' => []]);
     }

@@ -89,7 +89,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Serve students.json from data directory
-app.get('/data/students.json', (req, res) => {
+app.get('./data/students.json', (req, res) => {
     try {
         const data = readStudentsData();
         res.setHeader('Content-Type', 'application/json');
