@@ -59,10 +59,21 @@
         </div>
     </div>
 
-    <!-- إضافة ملف البيانات -->
-    <script src="/js/students-data.js"></script>
-    
     <script>
+        // تحميل البيانات من ملف JSON
+        async function loadStudentsData() {
+            try {
+                const response = await fetch('/data/students.json');
+                if (!response.ok) {
+                    throw new Error('فشل في تحميل البيانات');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                throw error;
+            }
+        }
+
         async function login(event) {
             event.preventDefault();
             
@@ -77,7 +88,10 @@
             try {
                 console.log('محاولة تسجيل دخول:', studentName);
                 
-                // البحث عن الطالب في البيانات
+                // تحميل البيانات من الملف
+                const studentsData = await loadStudentsData();
+                
+                // البحث عن الطالب
                 const student = studentsData.students.find(s => 
                     s.name.trim().toLowerCase() === studentName.trim().toLowerCase() && 
                     s.password === password
