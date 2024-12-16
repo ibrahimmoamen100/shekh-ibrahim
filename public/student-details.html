@@ -5,174 +5,197 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تفاصيل الطالب</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
         body {
-            font-family: 'Tajawal', sans-serif;
+            font-family: 'Noto Kufi Arabic', sans-serif;
+            background: linear-gradient(135deg, #f6f8ff 0%, #e9f0ff 100%);
+        }
+        .gradient-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .gradient-card:hover {
+            transform: translateY(-2px);
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .status-paid {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-unpaid {
+            background-color: #fee2e2;
+            color: #991b1b;
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-white">
-        جاري التحميل...
-    </div>
+<body class="min-h-screen py-8">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <!-- بطاقة معلومات الطالب الرئيسية -->
+        <div class="gradient-card rounded-2xl p-8 mb-8">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="relative">
+                    <div class="w-40 h-40 rounded-full overflow-hidden ring-4 ring-blue-100">
+                        <img id="studentPhoto" src="" alt="صورة الطالب" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm">
+                        <span id="evaluation" class="flex items-center gap-1">
+                            <i class="fas fa-star text-yellow-300"></i>
+                            <span>ممتاز</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="flex-1 text-center md:text-right">
+                    <h1 id="studentName" class="text-3xl font-bold text-gray-800 mb-4"></h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-book-quran text-blue-500"></i>
+                                <span>السورة الحالية:</span>
+                                <span id="currentSurah" class="font-semibold text-gray-800"></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-bookmark text-green-500"></i>
+                                <span>آخر سورة:</span>
+                                <span id="lastSurah" class="font-semibold text-gray-800"></span>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-calendar-check text-purple-500"></i>
+                                <span>عدد الحصص:</span>
+                                <span id="sessionsAttended" class="font-semibold text-gray-800"></span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fas fa-money-bill-wave text-yellow-500"></i>
+                                <span>نوع الدفع:</span>
+                                <span id="paymentType" class="font-semibold text-gray-800"></span>
+                            </div>
+                            <div id="paymentStatus" class="status-badge"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <div id="main-content" class="container mx-auto px-4 py-8" style="display: none;">
-        <div class="bg-white shadow rounded-lg p-6">
-            <div class="flex items-center space-x-4 mb-6">
-                <img id="student-image" src="/images/default-avatar.png" alt="صورة الطالب" class="w-24 h-24 rounded-full">
-                <div>
-                    <h1 id="student-name" class="text-2xl font-bold"></h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <!-- جدول المواعيد -->
+            <div class="gradient-card rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-calendar text-indigo-500"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">جدول المواعيد</h2>
+                </div>
+                <div id="scheduleContainer" class="space-y-4">
+                    <!-- سيتم إضافة المواعيد هنا -->
                 </div>
             </div>
 
             <!-- الورد اليومي -->
-            <div class="mb-6 p-4 bg-green-50 rounded-lg">
-                <h2 class="text-xl font-semibold mb-2">الورد اليومي</h2>
-                <p id="wird-routine" class="text-gray-700"></p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h2 class="text-xl font-semibold mb-4">معلومات الحفظ</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-gray-600">السورة الحالية:</p>
-                            <p id="current-surah" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">آخر سورة:</p>
-                            <p id="last-surah" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">التقييم:</p>
-                            <p id="evaluation" class="font-medium"></p>
-                        </div>
+            <div class="gradient-card rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book-open text-green-500"></i>
                     </div>
+                    <h2 class="text-xl font-bold text-gray-800">الورد اليومي</h2>
                 </div>
+                <div id="wirdRoutine" class="text-gray-700 whitespace-pre-line leading-relaxed"></div>
+            </div>
+        </div>
 
-                <div>
-                    <h2 class="text-xl font-semibold mb-4">معلومات الدفع</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-gray-600">نوع الدفع:</p>
-                            <p id="payment-type" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">حالة الدفع للشهر الحالي:</p>
-                            <p id="payment-status" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">تاريخ آخر دفعة:</p>
-                            <p id="last-payment-date" class="font-medium"></p>
-                        </div>
-                        <div>
-                            <p class="text-gray-600">عدد الحلقات:</p>
-                            <p id="sessions-attended" class="font-medium"></p>
-                        </div>
-                    </div>
+        <!-- الملاحظات -->
+        <div class="gradient-card rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-note-sticky text-yellow-500"></i>
                 </div>
+                <h2 class="text-xl font-bold text-gray-800">الملاحظات</h2>
             </div>
+            <div id="notes" class="text-gray-700 whitespace-pre-line leading-relaxed bg-yellow-50 p-4 rounded-lg"></div>
+        </div>
 
-            <div class="mt-6">
-                <h2 class="text-xl font-semibold mb-4">جدول الحلقات</h2>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    اليوم
-                                </th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    الوقت
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody id="schedule-table-body" class="bg-white divide-y divide-gray-200">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="mt-6">
-                <h2 class="text-xl font-semibold mb-4">ملاحظات</h2>
-                <p id="notes" class="text-gray-700"></p>
-            </div>
-
-            <div class="mt-6">
-                <button id="logout-button" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                    تسجيل الخروج
-                </button>
-            </div>
+        <!-- زر تسجيل الخروج -->
+        <div class="text-center mt-8">
+            <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full transition-colors duration-300 flex items-center gap-2 mx-auto">
+                <i class="fas fa-sign-out-alt"></i>
+                تسجيل الخروج
+            </button>
         </div>
     </div>
 
-    <!-- إضافة ملف البيانات -->
-    <script src="/js/students-data.js"></script>
-    
     <script>
         function loadStudentDetails() {
             try {
-                // الحصول على بيانات الطالب من التخزين المحلي
                 const studentData = JSON.parse(localStorage.getItem('studentData'));
                 const wirdRoutine = localStorage.getItem('wirdRoutine');
-                
+
                 if (!studentData) {
                     window.location.href = '/students-portal.html';
                     return;
                 }
 
                 // تحديث معلومات الطالب
-                document.getElementById('student-name').textContent = studentData.name;
-                document.getElementById('wird-routine').textContent = wirdRoutine;
-                document.getElementById('current-surah').textContent = studentData.currentSurah || 'لم يتم تحديد السورة';
-                document.getElementById('last-surah').textContent = studentData.lastSurah || 'لم يتم تحديد السورة';
-                document.getElementById('evaluation').textContent = studentData.evaluation || 'لم يتم التقييم';
-                document.getElementById('payment-type').textContent = studentData.paymentType || 'لم يتم تحديد نوع الدفع';
-                document.getElementById('payment-status').textContent = studentData.currentMonthPaid ? 'تم الدفع' : 'لم يتم الدفع';
-                document.getElementById('last-payment-date').textContent = studentData.lastPaymentDate ? new Date(studentData.lastPaymentDate).toLocaleDateString('ar-SA') : 'لا يوجد';
-                document.getElementById('sessions-attended').textContent = (studentData.sessionsAttended || 0) + ' حلقه';
+                document.getElementById('studentName').textContent = studentData.name;
+                document.getElementById('currentSurah').textContent = studentData.currentSurah || 'لم يتم تحديد السورة';
+                document.getElementById('lastSurah').textContent = studentData.lastSurah || 'لم يتم تحديد السورة';
+                document.getElementById('evaluation').innerHTML = `
+                    <i class="fas fa-star text-yellow-300"></i>
+                    <span>${studentData.evaluation || 'لم يتم التقييم'}</span>
+                `;
+                document.getElementById('sessionsAttended').textContent = (studentData.sessionsAttended || 0) + ' حلقة';
+                document.getElementById('paymentType').textContent = studentData.paymentType || 'لم يتم تحديد';
+                
+                // تحديث حالة الدفع مع التصميم المناسب
+                const paymentStatus = document.getElementById('paymentStatus');
+                if (studentData.currentMonthPaid) {
+                    paymentStatus.classList.add('status-paid');
+                    paymentStatus.innerHTML = '<i class="fas fa-check-circle"></i> تم الدفع';
+                } else {
+                    paymentStatus.classList.add('status-unpaid');
+                    paymentStatus.innerHTML = '<i class="fas fa-times-circle"></i> لم يتم الدفع';
+                }
+
+                document.getElementById('wirdRoutine').textContent = wirdRoutine || 'لم يتم تحديد الورد اليومي';
                 document.getElementById('notes').textContent = studentData.notes || 'لا توجد ملاحظات';
 
                 // تحديث صورة الطالب
-                const studentPhoto = document.getElementById('student-image');
+                const studentPhoto = document.getElementById('studentPhoto');
                 if (studentData.photo) {
                     studentPhoto.src = studentData.photo;
                 } else {
                     studentPhoto.src = '/images/default-avatar.png';
                 }
 
-                // تحديث جدول الحلقات
-                const scheduleTableBody = document.getElementById('schedule-table-body');
-                scheduleTableBody.innerHTML = '';
+                // تحديث جدول المواعيد
+                const scheduleContainer = document.getElementById('scheduleContainer');
+                scheduleContainer.innerHTML = '';
 
                 if (studentData.schedule && studentData.schedule.length > 0) {
                     studentData.schedule.forEach(scheduleItem => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                                ${scheduleItem.day}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-500">
-                                ${scheduleItem.time}
-                            </td>
+                        const scheduleCard = document.createElement('div');
+                        scheduleCard.className = 'flex items-center justify-between bg-white p-4 rounded-lg shadow-sm';
+                        scheduleCard.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-blue-500"></i>
+                                </div>
+                                <span class="font-medium">${scheduleItem.day}</span>
+                            </div>
+                            <span class="text-gray-600">${scheduleItem.time}</span>
                         `;
-                        scheduleTableBody.appendChild(row);
+                        scheduleContainer.appendChild(scheduleCard);
                     });
                 } else {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td colspan="2" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                            لا توجد مواعيد محددة
-                        </td>
-                    `;
-                    scheduleTableBody.appendChild(row);
+                    scheduleContainer.innerHTML = '<p class="text-gray-500 text-center">لا توجد مواعيد محددة</p>';
                 }
-
-                // إخفاء شاشة التحميل وإظهار المحتوى
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
 
             } catch (error) {
                 console.error('Error loading student details:', error);
@@ -180,13 +203,12 @@
             }
         }
 
-        // تسجيل الخروج
-        document.getElementById('logout-button').addEventListener('click', () => {
+        function logout() {
             localStorage.removeItem('studentData');
             localStorage.removeItem('studentId');
             localStorage.removeItem('wirdRoutine');
             window.location.href = '/students-portal.html';
-        });
+        }
 
         // تحميل بيانات الطالب عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', loadStudentDetails);
