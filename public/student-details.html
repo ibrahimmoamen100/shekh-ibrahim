@@ -171,6 +171,42 @@
                     return `${hour}:${minutes} ${ampm}`;
                 }
 
+
+
+
+
+                document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // التحقق من وجود رمز الطالب
+        const studentId = localStorage.getItem('studentId');
+        if (!studentId) {
+            window.location.href = '/students-portal.html';
+            return;
+        }
+
+        console.log('Fetching student data...');
+        // جلب بيانات الطالب من API endpoint
+        const response = await fetch(`/api/students/${studentId}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch student data');
+        }
+        
+        const student = await response.json();
+        console.log('Loaded student data:', student);
+
+        // Display student data
+        displayStudentDetails(student);
+
+        // Hide loading screen and show content
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+    } catch (error) {
+        console.error('Error fetching student data:', error);
+        alert('حدث خطأ في جلب بيانات الطالب');
+        window.location.href = '/students-portal.html';
+    }
+});
+
                 function displayStudentDetails(student, data) {
                     // Display student info
                     document.getElementById('student-name').textContent = student.name;
