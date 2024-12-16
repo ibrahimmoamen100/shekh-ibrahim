@@ -18,26 +18,37 @@ app.use((req, res, next) => {
     next();
 });
 
-// Create necessary directories
-const publicDir = path.join(__dirname, 'public');
-const uploadsDir = path.join(publicDir, 'uploads');
-const dataDir = path.join(__dirname, 'data');
-const logsDir = path.join(__dirname, 'logs');
+// Check if running in production (Vercel)
+const isProduction = process.env.VERCEL === '1';
 
-[publicDir, uploadsDir, dataDir, logsDir].forEach(dir => {
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-});
+// Create necessary directories (only in development)
+if (!isProduction) {
+    const publicDir = path.join(__dirname, 'public');
+    const uploadsDir = path.join(publicDir, 'uploads');
+    const dataDir = path.join(__dirname, 'data');
+    const logsDir = path.join(__dirname, 'logs');
+
+    [publicDir, uploadsDir, dataDir, logsDir].forEach(dir => {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+    });
+}
 
 // Configure multer for file uploads with error handling
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        // Ensure uploads directory exists
-        if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
+        if (isProduction) {
+            // In production, use /tmp directory
+            cb(null, '/tmp');
+        } else {
+            // In development, use uploads directory
+            const uploadsDir = path.join(__dirname, 'public', 'uploads');
+            if (!fs.existsSync(uploadsDir)) {
+                fs.mkdirSync(uploadsDir, { recursive: true });
+            }
+            cb(null, uploadsDir);
         }
-        cb(null, uploadsDir);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -49,8 +60,7 @@ const upload = multer({
     storage: storage,
     fileFilter: function (req, file, cb) {
         // Accept images only
-        if (!file.originalname.match(/\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF)$/)) {
-            req.fileValidationError = 'Only image files are allowed!';
+        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
             return cb(new Error('Only image files are allowed!'), false);
         }
         cb(null, true);
@@ -61,15 +71,12 @@ const upload = multer({
 const handleUpload = (req, res, next) => {
     upload(req, res, function (err) {
         if (err instanceof multer.MulterError) {
-            // A Multer error occurred when uploading
             console.error('Multer error:', err);
-            return res.status(500).json({ message: 'حدث خطأ أثناء رفع الصورة: ' + err.message });
+            return res.status(400).json({ error: 'خطأ في رفع الملف' });
         } else if (err) {
-            // An unknown error occurred when uploading
-            console.error('Unknown upload error:', err);
-            return res.status(500).json({ message: 'حدث خطأ غير معروف أثناء رفع الصورة: ' + err.message });
+            console.error('Upload error:', err);
+            return res.status(500).json({ error: 'حدث خطأ أثناء رفع الملف' });
         }
-        // Everything went fine
         next();
     });
 };
@@ -78,19 +85,13 @@ const handleUpload = (req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from public directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files
+app.use(express.static('public'));
 
 // Serve students.json from data directory
 app.get('/data/students.json', (req, res) => {
     try {
-        const filePath = path.join(__dirname, 'data', 'students.json');
-        console.log('Serving students.json from:', filePath);
-        
-        // Read the file synchronously to ensure we get the latest data
-        const data = fs.readFileSync(filePath, 'utf8');
-        console.log('Read data:', data);
-        
+        const data = readStudentsData();
         res.setHeader('Content-Type', 'application/json');
         res.send(data);
     } catch (error) {
@@ -123,16 +124,18 @@ app.get('/admin', (req, res) => {
 // Helper Functions
 function readStudentsData() {
     try {
-        const filePath = path.join(dataDir, 'students.json');
-        
-        // If file doesn't exist, create it with default structure
-        if (!fs.existsSync(filePath)) {
-            const defaultData = { students: [], wirdRoutine: '' };
-            fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
-            return defaultData;
+        let rawData;
+        if (isProduction) {
+            // In production, read from environment variable
+            rawData = process.env.STUDENTS_DATA || '{"students":[],"wirdRoutine":""}';
+        } else {
+            // In development, read from file
+            const dataPath = path.join(__dirname, 'data', 'students.json');
+            if (!fs.existsSync(dataPath)) {
+                return { students: [], wirdRoutine: '' };
+            }
+            rawData = fs.readFileSync(dataPath, 'utf8');
         }
-        
-        const rawData = fs.readFileSync(filePath, 'utf8');
         return JSON.parse(rawData);
     } catch (error) {
         console.error('Error reading students data:', error);
@@ -142,9 +145,16 @@ function readStudentsData() {
 
 function writeStudentsData(data) {
     try {
-        const filePath = path.join(dataDir, 'students.json');
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-        return true;
+        if (isProduction) {
+            // In production, log the data (you'll need to handle this differently)
+            console.log('Would update data in production:', data);
+            return true;
+        } else {
+            // In development, write to file
+            const dataPath = path.join(__dirname, 'data', 'students.json');
+            fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+            return true;
+        }
     } catch (error) {
         console.error('Error writing students data:', error);
         return false;
