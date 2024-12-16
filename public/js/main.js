@@ -115,10 +115,12 @@ async function updatePaymentStatus(id, paid) {
         const response = await fetch(`/api/students/${id}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
             body: JSON.stringify({
-                currentMonthPaid: paid
+                currentMonthPaid: paid,
+                lastPaymentDate: paid ? new Date().toISOString() : null
             })
         });
 
@@ -221,116 +223,6 @@ addStudentForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Edit student form submission
-document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    try {
-        const formData = new FormData(e.target);
-        const studentId = formData.get('studentId'); // Get the student ID from the form
-        const studentData = {
-            name: formData.get('name'),
-            currentSurah: formData.get('currentSurah'),
-            lastSurah: formData.get('lastSurah'),
-            evaluation: formData.get('evaluation'),
-            paymentType: formData.get('paymentType'),
-            notes: formData.get('notes')
-        };
-
-        // Only include password if it's not empty
-        const password = formData.get('password');
-        if (password && password.trim() !== '') {
-            studentData.password = password;
-        }
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert('الرجاء تسجيل الدخول أولاً');
-            return;
-        }
-
-        console.log('Sending update with data:', studentData);
-        
-        const response = await fetch(`/api/students/${studentId}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(studentData)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to update student');
-        }
-
-        console.log('Update successful');
-        closeEditModal();
-        loadStudents();
-    } catch (error) {
-        console.error('Error updating student:', error);
-        alert('حدث خطأ أثناء تحديث بيانات الطالب: ' + error.message);
-    }
-});
-
-// Load students from server
-function loadStudents() {
-    fetch('/api/students')
-        .then(response => response.json())
-        .then(students => {
-            console.log('Server response:', students);
-            const tbody = document.getElementById('studentsList');
-            tbody.innerHTML = '';
-            
-            students.forEach(student => {
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50';
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap sticky right-0 bg-white">
-                        <img src="${student.photo || '/uploads/placeholder.png'}" alt="${student.name}" 
-                             class="w-12 h-12 rounded-full object-cover">
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">${student.name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${student.currentSurah}</td>
-                    <td class="px-6 py-4 whitespace-normal">${formatSchedule(student.schedule)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <span class="sessions-count ml-2">${student.sessionsAttended}</span>
-                            <button onclick="incrementSessions('${student.id}', ${student.sessionsAttended})" 
-                                    class="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">
-                                تم حضور حلقة
-                            </button>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">${student.paymentType === 'monthly' ? 'شهري' : student.paymentType === 'yearly' ? 'سنوي' : 'بالحلقة'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${formatPaymentStatus(student)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <select onchange="updateEvaluation('${student.id}', this.value)" class="border rounded p-1">
-                            <option value="" ${!student.evaluation ? 'selected' : ''}>-</option>
-                            <option value="ممتاز" ${student.evaluation === 'ممتاز' ? 'selected' : ''}>ممتاز</option>
-                            <option value="جيد جداً" ${student.evaluation === 'جيد جداً' ? 'selected' : ''}>جيد جداً</option>
-                            <option value="جيد" ${student.evaluation === 'جيد' ? 'selected' : ''}>جيد</option>
-                            <option value="مقبول" ${student.evaluation === 'مقبول' ? 'selected' : ''}>مقبول</option>
-                            <option value="ضعيف" ${student.evaluation === 'ضعيف' ? 'selected' : ''}>ضعيف</option>
-                        </select>
-                    </td>
-                    <td class="px-6 py-4 whitespace-normal">${student.notes || '-'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap sticky left-0 bg-white">
-                        <div class="flex space-x-2">
-                            <button onclick="openEditModal('${student.id}')" class="text-blue-600 hover:text-blue-800 ml-2">تعديل</button>
-                            <button onclick="deleteStudent('${student.id}')" class="text-red-600 hover:text-red-800">حذف</button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading students:', error);
-            alert('حدث خطأ أثناء تحميل بيانات الطلاب');
-        });
-}
-
 // Edit student
 async function openEditModal(studentId) {
     try {
@@ -351,19 +243,20 @@ async function openEditModal(studentId) {
         }
         
         const student = await response.json();
-        console.log('Server response:', student);
+        console.log('Loading student data:', student);
+        
         if (!student) {
             throw new Error('Student not found');
         }
         
         // Fill the edit form with student data
         const form = document.getElementById('editStudentForm');
-        document.getElementById('editStudentId').value = student.id;
-        form.querySelector('input[name="name"]').value = student.name;
-        form.querySelector('input[name="currentSurah"]').value = student.currentSurah;
+        form.querySelector('#editStudentId').value = student.id;
+        form.querySelector('input[name="name"]').value = student.name || '';
+        form.querySelector('input[name="currentSurah"]').value = student.currentSurah || '';
         form.querySelector('input[name="lastSurah"]').value = student.lastSurah || '';
         form.querySelector('select[name="evaluation"]').value = student.evaluation || '';
-        form.querySelector('select[name="paymentType"]').value = student.paymentType;
+        form.querySelector('select[name="paymentType"]').value = student.paymentType || '';
         form.querySelector('textarea[name="notes"]').value = student.notes || '';
         
         // Clear existing schedule items
@@ -414,7 +307,186 @@ async function openEditModal(studentId) {
         const modal = document.getElementById('editStudentModal');
         modal.style.display = 'block';
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error opening edit modal:', error);
+        alert('حدث خطأ أثناء تحميل بيانات الطالب');
+    }
+}
+
+// Edit student form submission
+document.getElementById('editStudentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        const studentId = document.getElementById('editStudentId').value;
+        console.log('Student ID from hidden field:', studentId);
+        
+        if (!studentId) {
+            throw new Error('رقم الطالب غير موجود');
+        }
+
+        // Get schedule data
+        const schedule = [];
+        const scheduleItems = document.querySelectorAll('#editScheduleContainer .schedule-item');
+        scheduleItems.forEach(item => {
+            const day = item.querySelector('select[name="day"]').value;
+            const time = item.querySelector('input[name="time"]').value;
+            if (day && time) {
+                schedule.push({ day, time });
+            }
+        });
+
+        const formData = new FormData(e.target);
+        const studentData = {
+            name: formData.get('name'),
+            currentSurah: formData.get('currentSurah'),
+            lastSurah: formData.get('lastSurah'),
+            evaluation: formData.get('evaluation'),
+            paymentType: formData.get('paymentType'),
+            notes: formData.get('notes'),
+            schedule: schedule
+        };
+
+        // Only include password if it's not empty
+        const password = formData.get('password');
+        if (password && password.trim() !== '') {
+            studentData.password = password;
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert('الرجاء تسجيل الدخول أولاً');
+            return;
+        }
+
+        console.log('Updating student:', studentId, 'with data:', studentData);
+        
+        const response = await fetch(`/api/students/${studentId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(studentData)
+        });
+
+        const responseText = await response.text();
+        console.log('Server response text:', responseText);
+
+        if (!response.ok) {
+            throw new Error(`فشل تحديث بيانات الطالب: ${responseText}`);
+        }
+
+        const updatedStudent = JSON.parse(responseText);
+        console.log('Update successful:', updatedStudent);
+        alert('تم تحديث بيانات الطالب بنجاح');
+        closeEditModal();
+        loadStudents();
+    } catch (error) {
+        console.error('Error updating student:', error);
+        alert('حدث خطأ أثناء تحديث بيانات الطالب: ' + error.message);
+    }
+});
+
+// Format date in Arabic
+function formatDate(dateString) {
+    if (!dateString) return 'لا يوجد';
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            return 'لا يوجد';
+        }
+        const options = {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+        };
+        return new Intl.DateTimeFormat('ar-SA', options).format(date);
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'لا يوجد';
+    }
+}
+
+// Load students from server
+async function loadStudents() {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No token found');
+            return;
+        }
+
+        const response = await fetch('/api/students', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const students = await response.json();
+
+        const tableBody = document.getElementById('studentsList');
+        if (!tableBody) {
+            console.error('Student list table body not found');
+            return;
+        }
+
+        tableBody.innerHTML = '';
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50';
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                            <img class="h-10 w-10 rounded-full" src="${student.photo || '/images/default-avatar.png'}" alt="${student.name}">
+                        </div>
+                        <div class="mr-4">
+                            <div class="text-sm font-medium text-gray-900">${student.name}</div>
+                            <div class="text-sm text-gray-500">ID: ${student.id}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${student.currentSurah || 'لم يتم تحديد'}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${student.lastSurah || 'لم يتم تحديد'}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${formatSchedule(student.schedule || [])}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${student.evaluation || 'لم يتم التقييم'}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${student.paymentType || 'لم يتم تحديد'}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${student.sessionsAttended || 0}</div>
+                    <button onclick="incrementSessions('${student.id}', ${student.sessionsAttended || 0})" 
+                            class="text-xs text-green-600 hover:text-green-800">
+                        +1
+                    </button>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    ${formatPaymentStatus(student)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900">${formatDate(student.lastPaymentDate)}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm text-gray-900">${student.notes || 'لا توجد ملاحظات'}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium sticky left-0 bg-white">
+                    <button onclick="openEditModal('${student.id}')" class="text-green-600 hover:text-green-900 ml-2">تعديل</button>
+                    <button onclick="deleteStudent('${student.id}')" class="text-red-600 hover:text-red-900">حذف</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error loading students:', error);
     }
 }
 

@@ -151,11 +151,33 @@ function writeStudentsData(data) {
     }
 }
 
+// Helper function to format dates in 12-hour format
+function formatDate(date) {
+    if (!date) return null;
+    const options = {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+    };
+    return new Date(date).toLocaleString('ar-SA', options);
+}
+
 // API Routes
 app.get('/api/students', (req, res) => {
     try {
         const data = readStudentsData();
-        res.json(data.students);
+        
+        // Format dates for all students
+        const formattedStudents = data.students.map(student => ({
+            ...student,
+            lastPaymentDate: formatDate(student.lastPaymentDate),
+            createdAt: formatDate(student.createdAt)
+        }));
+
+        res.json(formattedStudents);
     } catch (error) {
         console.error('Error getting students:', error);
         res.status(500).json({ error: 'Failed to get students' });
@@ -164,25 +186,55 @@ app.get('/api/students', (req, res) => {
 
 app.get('/api/students/:id', (req, res) => {
     try {
-        const studentId = req.params.id;
-        console.log('Fetching details for student:', studentId);
-
-        const data = readStudentsData();
-        const student = data.students.find(s => s.id === studentId);
-
+        const studentsData = readStudentsData();
+        const student = studentsData.students.find(s => s.id === req.params.id);
+        
         if (!student) {
-            console.log('Student not found:', studentId);
-            return res.status(404).json({ error: 'الطالب غير موجود' });
+            return res.status(404).json({ error: 'Student not found' });
         }
 
-        console.log('Found student:', student);
+        // Format dates before sending
+        if (student.lastPaymentDate) {
+            student.lastPaymentDate = formatDate(student.lastPaymentDate);
+        }
+        if (student.createdAt) {
+            student.createdAt = formatDate(student.createdAt);
+        }
+
+        res.json(student);
+    } catch (error) {
+        console.error('Error getting student:', error);
+        res.status(500).json({ error: 'Failed to get student' });
+    }
+});
+
+app.get('/api/students/:id', async (req, res) => {
+    try {
+        const studentId = req.params.id;
+        
+        if (!studentId) {
+            return res.status(400).json({ error: 'معرف الطالب مطلوب' });
+        }
+        
+        const studentsData = readStudentsData();
+        const student = studentsData.students.find(s => s.id === studentId);
+
+        if (!student) {
+            return res.status(404).json({
+                success: false,
+                error: 'الطالب غير موجود'
+            });
+        }
+
         // Send all student data except password
         const { password, ...studentData } = student;
-        console.log('Sending student data:', studentData);
         res.json(studentData);
     } catch (error) {
         console.error('Error fetching student details:', error);
-        res.status(500).json({ error: 'حدث خطأ في جلب بيانات الطالب' });
+        res.status(500).json({
+            success: false,
+            error: 'حدث خطأ في جلب بيانات الطالب'
+        });
     }
 });
 
@@ -211,7 +263,7 @@ app.post('/api/students', handleUpload, (req, res) => {
             schedule: schedule,
             evaluation: req.body.evaluation || 'ممتاز',
             sessionsAttended: 0,
-            paymentType: req.body.paymentType || 'perSession',
+            paymentType: req.body.paymentType || 'بالحلقه',
             notes: req.body.notes || '',
             photo: req.file ? `/uploads/${req.file.filename}` : null,
             currentMonthPaid: false,
@@ -268,64 +320,75 @@ app.put('/api/students/:id', handleUpload, (req, res) => {
             return res.status(404).json({ error: 'Student not found' });
         }
 
+        // Keep existing student data
         let updatedStudent = { ...data.students[studentIndex] };
 
-        // Handle payment status update
-        if (req.body.currentMonthPaid !== undefined || req.body.sessionsAttended !== undefined) {
-            if (req.body.currentMonthPaid !== undefined) {
-                updatedStudent.currentMonthPaid = req.body.currentMonthPaid;
-                updatedStudent.lastPaymentDate = req.body.currentMonthPaid ? new Date().toISOString() : null;
-            }
-            if (req.body.sessionsAttended !== undefined) {
-                updatedStudent.sessionsAttended = req.body.sessionsAttended;
-            }
-        } 
-        // Handle full student update
-        else {
-            // Update basic info
-            updatedStudent = {
-                ...updatedStudent,
-                name: req.body.name || updatedStudent.name,
-                currentSurah: req.body.currentSurah || updatedStudent.currentSurah,
-                lastSurah: req.body.lastSurah || updatedStudent.lastSurah,
-                evaluation: req.body.evaluation || updatedStudent.evaluation,
-                paymentType: req.body.paymentType || updatedStudent.paymentType,
-                notes: req.body.notes || updatedStudent.notes
-            };
+        // Update fields if they are provided in the request
+        if (req.body.name !== undefined) updatedStudent.name = req.body.name;
+        if (req.body.currentSurah !== undefined) updatedStudent.currentSurah = req.body.currentSurah;
+        if (req.body.lastSurah !== undefined) updatedStudent.lastSurah = req.body.lastSurah;
+        if (req.body.evaluation !== undefined) updatedStudent.evaluation = req.body.evaluation;
+        if (req.body.paymentType !== undefined) updatedStudent.paymentType = req.body.paymentType;
+        if (req.body.notes !== undefined) updatedStudent.notes = req.body.notes;
+        if (req.body.sessionsAttended !== undefined) updatedStudent.sessionsAttended = parseInt(req.body.sessionsAttended) || 0;
+        if (req.body.currentMonthPaid !== undefined) {
+            updatedStudent.currentMonthPaid = req.body.currentMonthPaid;
+            updatedStudent.lastPaymentDate = req.body.currentMonthPaid ? new Date().toISOString() : null;
+        }
 
-            // Handle password update
-            if (req.body.password && req.body.password.trim() !== '') {
-                console.log('Updating password for student:', studentId);
-                updatedStudent.password = req.body.password.trim();
-            }
+        // Handle password update
+        if (req.body.password && req.body.password.trim() !== '') {
+            updatedStudent.password = req.body.password.trim();
+        }
 
-            // Handle payment type change
-            if (req.body.paymentType && req.body.paymentType !== data.students[studentIndex].paymentType) {
-                updatedStudent.currentMonthPaid = false;
-                updatedStudent.lastPaymentDate = null;
-                updatedStudent.sessionsAttended = 0;
-            }
+        // Handle payment type change
+        if (req.body.paymentType && req.body.paymentType !== data.students[studentIndex].paymentType) {
+            updatedStudent.currentMonthPaid = false;
+            updatedStudent.lastPaymentDate = null;
+            updatedStudent.sessionsAttended = 0;
+        }
 
-            // Handle photo update
-            if (req.file) {
-                if (data.students[studentIndex].photo) {
-                    const oldPhotoPath = path.join(__dirname, 'public', data.students[studentIndex].photo);
-                    if (fs.existsSync(oldPhotoPath)) {
-                        fs.unlinkSync(oldPhotoPath);
-                    }
+        // Handle photo update
+        if (req.file) {
+            if (data.students[studentIndex].photo) {
+                const oldPhotoPath = path.join(__dirname, 'public', data.students[studentIndex].photo);
+                if (fs.existsSync(oldPhotoPath)) {
+                    fs.unlinkSync(oldPhotoPath);
                 }
-                updatedStudent.photo = '/uploads/' + req.file.filename;
+            }
+            updatedStudent.photo = '/uploads/' + req.file.filename;
+        }
+
+        // Handle schedule update
+        if (req.body.schedule) {
+            try {
+                updatedStudent.schedule = typeof req.body.schedule === 'string' 
+                    ? JSON.parse(req.body.schedule) 
+                    : req.body.schedule;
+            } catch (error) {
+                console.error('Error parsing schedule:', error);
             }
         }
 
         // Update the student data
         data.students[studentIndex] = updatedStudent;
         
-        // Write to both files
-        writeStudentsData(data);
+        // Write to file
+        const success = writeStudentsData(data);
+        if (!success) {
+            throw new Error('Failed to write student data');
+        }
         
         console.log('Student updated successfully:', updatedStudent);
-        res.json(updatedStudent);
+        
+        // Format dates before sending response
+        const responseStudent = {
+            ...updatedStudent,
+            lastPaymentDate: updatedStudent.lastPaymentDate ? formatDate(updatedStudent.lastPaymentDate) : null,
+            createdAt: updatedStudent.createdAt ? formatDate(updatedStudent.createdAt) : null
+        };
+        
+        res.json(responseStudent);
     } catch (error) {
         console.error('Error updating student:', error);
         res.status(500).json({ error: 'Failed to update student', message: error.message });
@@ -397,36 +460,6 @@ app.post('/api/student/login', async (req, res) => {
     }
 });
 
-app.get('/api/students/:id', async (req, res) => {
-    try {
-        const studentId = req.params.id;
-        
-        if (!studentId) {
-            return res.status(400).json({ error: 'معرف الطالب مطلوب' });
-        }
-        
-        const studentsData = readStudentsData();
-        const student = studentsData.students.find(s => s.id === studentId);
-
-        if (!student) {
-            return res.status(404).json({
-                success: false,
-                error: 'الطالب غير موجود'
-            });
-        }
-
-        // Send all student data except password
-        const { password, ...studentData } = student;
-        res.json(studentData);
-    } catch (error) {
-        console.error('Error fetching student details:', error);
-        res.status(500).json({
-            success: false,
-            error: 'حدث خطأ في جلب بيانات الطالب'
-        });
-    }
-});
-
 // Admin login endpoint
 app.post('/api/admin/login', (req, res) => {
     try {
@@ -469,49 +502,32 @@ app.get('/api/outstanding-students', (req, res) => {
 // Get wird routine
 app.get('/api/wird-routine', (req, res) => {
     try {
-        const studentsData = readStudentsData();
-        console.log('Wird Routine:', studentsData.wirdRoutine); // Add logging
-        res.json({ wirdRoutine: studentsData.wirdRoutine });
+        const data = readStudentsData();
+        res.json({ wirdRoutine: data.wirdRoutine || '' });
     } catch (error) {
         console.error('Error getting wird routine:', error);
         res.status(500).json({ error: 'Failed to get wird routine' });
     }
 });
 
-// Update wird routine endpoint
+// Update wird routine
 app.post('/api/wird-routine', (req, res) => {
-    console.log('Received wird routine update request');
-    console.log('Request body:', req.body);
-    
     try {
         const { wirdRoutine } = req.body;
+        console.log('Updating wird routine to:', wirdRoutine);
+
+        const data = readStudentsData();
+        data.wirdRoutine = wirdRoutine;
         
-        if (!wirdRoutine) {
-            console.log('No wirdRoutine provided in request');
-            return res.status(400).json({ error: 'الورد اليومي مطلوب' });
+        const success = writeStudentsData(data);
+        if (!success) {
+            throw new Error('Failed to write wird routine');
         }
 
-        // Read current data
-        let data = readStudentsData();
-        
-        // If data is empty or doesn't have the correct structure, initialize it
-        if (!data || typeof data !== 'object') {
-            data = { students: [], wirdRoutine: '' };
-        }
-        
-        // Update wirdRoutine at the root level
-        data.wirdRoutine = wirdRoutine;
-        console.log('Updating wirdRoutine to:', wirdRoutine);
-        
-        // Write the updated data back to the file
-        writeStudentsData(data);
-        console.log('Successfully updated students.json with new wirdRoutine');
-        
-        // Send success response
-        return res.status(200).json({ message: 'تم تحديث الورد اليومي بنجاح' });
+        res.json({ wirdRoutine: data.wirdRoutine });
     } catch (error) {
-        console.error('Error in wird routine update:', error);
-        return res.status(500).json({ error: 'حدث خطأ في تحديث الورد اليومي: ' + error.message });
+        console.error('Error updating wird routine:', error);
+        res.status(500).json({ error: 'Failed to update wird routine' });
     }
 });
 
@@ -541,15 +557,17 @@ function authenticateAdmin(req, res, next) {
 }
 
 // Start the server
-const server = app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-}).on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} is already in use. Trying port ${port + 1}`);
-        app.listen(port + 1, () => {
-            console.log(`Server is running on port ${port + 1}`);
-        });
-    } else {
-        console.error('Server error:', err);
-    }
-});
+function startServer(port) {
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
+    }).on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.log(`Port ${port} is already in use. Trying port ${port + 1}`);
+            startServer(port + 1);
+        } else {
+            console.error('Server error:', err);
+        }
+    });
+}
+
+startServer(port);

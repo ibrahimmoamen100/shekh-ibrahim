@@ -1,5 +1,5 @@
 {
-  "wirdRoutine": "صلي علي النبي : 50 مره",
+  "wirdRoutine": "صلي علي النبي : 50 مره \nقرأه الايات المقرره : كل ايه 5 مرات",
   "students": [
     {
       "id": "1734167825077",
@@ -17,8 +17,8 @@
         }
       ],
       "evaluation": "ممتاز",
-      "sessionsAttended": 4,
-      "paymentType": "perSession",
+      "sessionsAttended": 0,
+      "paymentType": "بالحلقه",
       "notes": "ممتاز اللهم بارك , ومهذب في الحلقه وقدره استيعابو الايات جميله اللهم بارك",
       "photo": "/uploads/1734167825054-869269646.jpg",
       "currentMonthPaid": false,
@@ -38,11 +38,11 @@
         },
         {
           "day": "الأربعاء",
-          "time": "16:00"
+          "time": "12:00"
         }
       ],
       "evaluation": "ممتاز",
-      "sessionsAttended": 0,
+      "sessionsAttended": 1,
       "paymentType": "perSession",
       "notes": "ممتاز اللهم بارك و مريح في الحفظ وعنده قدر كبير من المعرفه اللهم بارك مقارنتا بعمره",
       "photo": "/uploads/1734215975720-998687586.jpg",

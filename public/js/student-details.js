@@ -13,16 +13,28 @@ async function loadStudentDetails() {
             return;
         }
 
+        // Fetch student details
         console.log('Fetching student details for ID:', studentId);
-        const response = await fetch(`/api/students/${studentId}`);
+        const studentResponse = await fetch(`/api/students/${studentId}`);
         
-        if (!response.ok) {
+        if (!studentResponse.ok) {
             throw new Error('Failed to fetch student details');
         }
 
-        const student = await response.json();
+        const student = await studentResponse.json();
         console.log('Received student data:', student);
-        
+
+        // Fetch wird routine
+        const wirdResponse = await fetch('/api/wird-routine');
+        if (!wirdResponse.ok) {
+            throw new Error('Failed to fetch wird routine');
+        }
+        const wirdData = await wirdResponse.json();
+        console.log('Received wird routine:', wirdData);
+
+        // Update wird routine
+        document.getElementById('wird-routine').textContent = wirdData.wirdRoutine || 'لم يتم تحديد الورد اليومي';
+
         // Update basic information
         document.getElementById('student-name').textContent = student.name;
         document.getElementById('current-surah').textContent = student.currentSurah || 'لم يتم تحديد السورة';
